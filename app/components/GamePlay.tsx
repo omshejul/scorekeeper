@@ -2,7 +2,8 @@
 
 import { Game, Player } from '@/app/types/game'
 import { motion } from 'framer-motion'
-import { useCallback, useRef, useState } from 'react'
+import { Minus, X } from 'lucide-react'
+import { useCallback, useState } from 'react'
 
 interface GamePlayProps {
   game: Game
@@ -12,9 +13,6 @@ interface GamePlayProps {
 
 export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayProps) {
   const [players, setPlayers] = useState<Player[]>(game.players)
-  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const [isHolding, setIsHolding] = useState(false)
 
   // Update parent game when exiting
   const updateParentGame = useCallback(() => {
@@ -34,32 +32,17 @@ export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayPro
     ))
   }, [])
 
-  const handleStart = useCallback((playerId: string) => {
-    holdTimeoutRef.current = setTimeout(() => {
-      setIsHolding(true)
-      decrementScore(playerId)
-      holdIntervalRef.current = setInterval(() => {
-        decrementScore(playerId)
-      }, 150)
-    }, 500)
-  }, [decrementScore])
+  const handleTap = useCallback((playerId: string, event: React.MouseEvent | React.TouchEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    incrementScore(playerId)
+  }, [incrementScore])
 
-  const handleEnd = useCallback((playerId: string) => {
-    if (holdTimeoutRef.current) {
-      clearTimeout(holdTimeoutRef.current)
-      holdTimeoutRef.current = null
-    }
-    if (holdIntervalRef.current) {
-      clearInterval(holdIntervalRef.current)
-      holdIntervalRef.current = null
-    }
-    
-    // If we weren't holding, it's a tap - increment score
-    if (!isHolding) {
-      incrementScore(playerId)
-    }
-    setIsHolding(false)
-  }, [isHolding, incrementScore])
+  const handleDecrement = useCallback((playerId: string, event: React.MouseEvent | React.TouchEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    decrementScore(playerId)
+  }, [decrementScore])
 
   const getGridLayout = () => {
     const playerCount = players.length
@@ -79,8 +62,8 @@ export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayPro
     }
   }
 
-  // Double tap to exit game
-  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+  // Exit game handler
+  const handleExit = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     updateParentGame() // Save current state before exiting
     onExitGame()
@@ -88,30 +71,40 @@ export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayPro
 
   return (
     <div className="fixed inset-0 select-none overflow-hidden">
-      {/* Exit hint */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
-        Double tap anywhere to exit
-      </div>
+      {/* Exit Button */}
+      <motion.button
+        className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200"
+        onClick={handleExit}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <X className="w-6 h-6" />
+      </motion.button>
 
       <div className={`grid h-full w-full ${getGridLayout()}`}>
         {players.map((player, index) => (
           <motion.div
             key={player.id}
-            className="relative flex items-center justify-center cursor-pointer user-select-none"
+            className="relative flex items-center justify-center cursor-pointer user-select-none touch-manipulation"
             style={{ backgroundColor: player.color }}
-            onMouseDown={() => handleStart(player.id)}
-            onMouseUp={() => handleEnd(player.id)}
-            onMouseLeave={() => handleEnd(player.id)}
-            onTouchStart={() => handleStart(player.id)}
-            onTouchEnd={() => handleEnd(player.id)}
-            onDoubleClick={handleDoubleClick}
+            onClick={(e) => handleTap(player.id, e)}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
           >
+            {/* Minus Button */}
+            <motion.button
+              className="absolute top-4 left-4 w-12 h-12 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-sm z-10 transition-all duration-200"
+              onClick={(e) => handleDecrement(player.id, e)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Minus className="w-5 h-5" />
+            </motion.button>
+
             {/* Player Name */}
-            <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-              <div className="bg-black/20 text-white px-4 py-2 rounded-full text-lg font-semibold backdrop-blur-sm">
+            <div className="absolute top-5 left-1/2 transform -translate-x-1/2">
+              <div className="bg-black/30 text-white px-4 py-2 rounded-full text-base font-semibold backdrop-blur-sm">
                 {player.name}
               </div>
             </div>
@@ -129,20 +122,6 @@ export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayPro
               </div>
             </motion.div>
 
-            {/* Tap indicator */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-              <div className="bg-black/20 text-white px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-                Tap +1 | Hold -1
-              </div>
-            </div>
-
-            {/* Touch effect */}
-            <motion.div
-              className="absolute inset-0 bg-white/10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isHolding ? 1 : 0 }}
-              transition={{ duration: 0.1 }}
-            />
           </motion.div>
         ))}
 
