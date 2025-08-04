@@ -30,7 +30,6 @@ export default function ShareGameModal({
   onClose,
 }: ShareGameModalProps) {
   const [shareUrl, setShareUrl] = useState("");
-  const [shareCode, setShareCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -40,6 +39,9 @@ export default function ShareGameModal({
   useEffect(() => {
     if (game && isOpen) {
       loadShareInfo();
+      const siteUrl = window.location.origin;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(siteUrl)}`;
+      setQrCodeUrl(qrUrl);
     }
   }, [game, isOpen]);
 
@@ -51,15 +53,7 @@ export default function ShareGameModal({
       if (response.ok) {
         const data = await response.json();
         setSharedWith(data.sharedWith || []);
-        if (data.shareCode) {
-          setShareCode(data.shareCode);
-          const url = `${window.location.origin}?join=${data.shareCode}`;
-          setShareUrl(url);
-          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-            url
-          )}`;
-          setQrCodeUrl(qrUrl);
-        }
+        setShareUrl(window.location.origin);
       }
     } catch (error) {
       console.error("Failed to load share info:", error);
@@ -84,14 +78,8 @@ export default function ShareGameModal({
       if (response.ok) {
         const data = await response.json();
         setSharedWith(data.sharedWith);
-        setShareCode(data.shareCode);
-        setShareUrl(data.shareUrl);
+        setShareUrl(window.location.origin);
         setNewEmail("");
-
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-          data.shareUrl
-        )}`;
-        setQrCodeUrl(qrUrl);
       } else {
         const error = await response.json();
         alert(error.error || "Failed to share game");
@@ -222,39 +210,6 @@ export default function ShareGameModal({
                   </div>
                 )}
 
-                {/* Share Link */}
-                {shareUrl && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Link className="w-4 h-4" />
-                      Share Link
-                    </label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={shareUrl}
-                        readOnly
-                        className="font-mono text-sm"
-                      />
-                      <Button
-                        onClick={copyToClipboard}
-                        variant="outline"
-                        className="shrink-0"
-                      >
-                        {copied ? (
-                          <Check className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <Copy className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </div>
-                    {copied && (
-                      <p className="text-sm text-green-600">
-                        ✓ Link copied to clipboard!
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 {/* QR Code */}
                 {qrCodeUrl && (
                   <div className="space-y-2">
@@ -265,12 +220,12 @@ export default function ShareGameModal({
                     <div className="flex justify-center p-4 bg-white rounded-lg">
                       <img
                         src={qrCodeUrl}
-                        alt="QR Code for game share"
+                        alt="QR Code for site"
                         className="w-32 h-32"
                       />
                     </div>
                     <p className="text-xs text-gray-500 text-center">
-                      Share code: <strong>{shareCode}</strong>
+                      Scan to visit site : {window.location.origin}
                     </p>
                   </div>
                 )}
