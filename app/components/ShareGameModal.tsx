@@ -5,17 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Copy,
-  Check,
-  QrCode,
-  Link,
-  Users,
-  Mail,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { X, QrCode, Users, Plus, Trash2, Loader } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ShareGameModalProps {
@@ -35,12 +25,16 @@ export default function ShareGameModal({
   const [newEmail, setNewEmail] = useState("");
   const [sharedWith, setSharedWith] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [qrCodeLoading, setQrCodeLoading] = useState(false);
 
   useEffect(() => {
     if (game && isOpen) {
       loadShareInfo();
       const siteUrl = window.location.origin;
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(siteUrl)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+        siteUrl
+      )}`;
+      setQrCodeLoading(true);
       setQrCodeUrl(qrUrl);
     }
   }, [game, isOpen]);
@@ -92,16 +86,6 @@ export default function ShareGameModal({
     }
   };
 
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-    }
-  };
-
   const removeSharedUser = async (email: string) => {
     // This would require another API endpoint to remove users
     console.log("Remove user:", email);
@@ -124,10 +108,10 @@ export default function ShareGameModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            className="w-full relative rounded-md max-w-lg max-h-[90vh] overflow-y-auto"
           >
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <Card className="pb-0 rounded-b-md gap-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
                   Share "{game.name}"
@@ -218,10 +202,17 @@ export default function ShareGameModal({
                       QR Code
                     </label>
                     <div className="flex justify-center p-4 bg-white rounded-lg">
+                      {qrCodeLoading && (
+                        <div className="w-32 h-32 flex items-center justify-center">
+                          <Loader className="w-8 h-8 animate-spin text-gray-900" />
+                        </div>
+                      )}
                       <img
                         src={qrCodeUrl}
                         alt="QR Code for site"
-                        className="w-32 h-32"
+                        className={`w-32 h-32 ${qrCodeLoading ? "hidden" : ""}`}
+                        onLoad={() => setQrCodeLoading(false)}
+                        onError={() => setQrCodeLoading(false)}
                       />
                     </div>
                     <p className="text-xs text-gray-500 text-center">
@@ -238,6 +229,7 @@ export default function ShareGameModal({
                   <p>⚠️ Only you (the owner) can delete this game.</p>
                 </div>
               </CardContent>
+              <div className="sticky bottom-0 left-0 right-0 rounded-b-md h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
             </Card>
           </motion.div>
         </motion.div>

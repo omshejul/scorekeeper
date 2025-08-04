@@ -81,7 +81,7 @@ export default function GameSetup({
   };
 
   return (
-    <div className="min-h-[80vh]">
+    <div className="min-h-[80vh] p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <motion.div
