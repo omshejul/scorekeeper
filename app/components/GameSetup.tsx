@@ -22,9 +22,9 @@ export default function GameSetup({
 }: GameSetupProps) {
   const [step, setStep] = useState<"count" | "names" | "colors">("count");
   const [playerCount, setPlayerCount] = useState(2);
-  const [gameName, setGameName] = useState(() => generateGameName());
+  const [gameName, setGameName] = useState("");
   const [playerNames, setPlayerNames] = useState<string[]>(() =>
-    generatePlayerNames(2)
+    Array(2).fill("")
   );
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
