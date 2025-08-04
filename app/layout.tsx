@@ -1,6 +1,7 @@
-import type { Metadata } from "next"
-import { Figtree, Geist, Geist_Mono } from "next/font/google"
-import "./globals.css"
+import type { Metadata } from "next";
+import { Figtree, Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,13 +18,18 @@ const figtree = Figtree({
   subsets: ["latin"],
 });
 
-
-
 export const metadata: Metadata = {
   title: "Score Keeper",
   description:
     "Keep track of scores and stats for your games and matches. Built with Next.js, React, and Tailwind CSS.",
-  keywords: ["sports", "scoring", "stats", "games", "matches", "score tracking"],
+  keywords: [
+    "sports",
+    "scoring",
+    "stats",
+    "games",
+    "matches",
+    "score tracking",
+  ],
   authors: [{ name: "Om Shejul" }],
   creator: "Om Shejul",
   icons: {
@@ -40,7 +46,11 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-      { url: "/apple-touch-icon-precomposed.png", sizes: "180x180", type: "image/png" }
+      {
+        url: "/apple-touch-icon-precomposed.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
   },
   openGraph: {
@@ -60,7 +70,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable}  font-sans antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

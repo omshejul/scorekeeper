@@ -1,0 +1,292 @@
+"use client";
+
+import { Game } from "@/app/types/game";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  Copy,
+  Check,
+  QrCode,
+  Link,
+  Users,
+  Mail,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+
+interface ShareGameModalProps {
+  game: Game | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ShareGameModal({
+  game,
+  isOpen,
+  onClose,
+}: ShareGameModalProps) {
+  const [shareUrl, setShareUrl] = useState("");
+  const [shareCode, setShareCode] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [sharedWith, setSharedWith] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (game && isOpen) {
+      loadShareInfo();
+    }
+  }, [game, isOpen]);
+
+  const loadShareInfo = async () => {
+    if (!game) return;
+
+    try {
+      const response = await fetch(`/api/games/${game.id}/share`);
+      if (response.ok) {
+        const data = await response.json();
+        setSharedWith(data.sharedWith || []);
+        if (data.shareCode) {
+          setShareCode(data.shareCode);
+          const url = `${window.location.origin}?join=${data.shareCode}`;
+          setShareUrl(url);
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+            url
+          )}`;
+          setQrCodeUrl(qrUrl);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load share info:", error);
+    }
+  };
+
+  const shareWithEmails = async () => {
+    if (!game || !newEmail.trim()) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/games/${game.id}/share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emails: [newEmail.trim()],
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSharedWith(data.sharedWith);
+        setShareCode(data.shareCode);
+        setShareUrl(data.shareUrl);
+        setNewEmail("");
+
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+          data.shareUrl
+        )}`;
+        setQrCodeUrl(qrUrl);
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to share game");
+      }
+    } catch (error) {
+      console.error("Failed to share game:", error);
+      alert("Failed to share game");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy:", error);
+    }
+  };
+
+  const removeSharedUser = async (email: string) => {
+    // This would require another API endpoint to remove users
+    console.log("Remove user:", email);
+  };
+
+  if (!game) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto"
+          >
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Share "{game.name}"
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                {/* Game Preview */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <h4 className="font-medium mb-2">{game.name}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {game.players.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex items-center gap-1 text-sm"
+                      >
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: player.color }}
+                        />
+                        {player.name}: {player.score}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Add New User */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Share with Email
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="Enter email address..."
+                      onKeyPress={(e) => e.key === "Enter" && shareWithEmails()}
+                    />
+                    <Button
+                      onClick={shareWithEmails}
+                      disabled={loading || !newEmail.trim()}
+                      className="shrink-0"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Currently Shared With */}
+                {sharedWith.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Shared with</label>
+                    <div className="space-y-2">
+                      {sharedWith.map((email) => (
+                        <div
+                          key={email}
+                          className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded p-2"
+                        >
+                          <span className="text-sm">{email}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeSharedUser(email)}
+                            className="h-6 w-6 p-0 text-red-600"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Share Link */}
+                {shareUrl && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Link className="w-4 h-4" />
+                      Share Link
+                    </label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={shareUrl}
+                        readOnly
+                        className="font-mono text-sm"
+                      />
+                      <Button
+                        onClick={copyToClipboard}
+                        variant="outline"
+                        className="shrink-0"
+                      >
+                        {copied ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {copied && (
+                      <p className="text-sm text-green-600">
+                        ✓ Link copied to clipboard!
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* QR Code */}
+                {qrCodeUrl && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <QrCode className="w-4 h-4" />
+                      QR Code
+                    </label>
+                    <div className="flex justify-center p-4 bg-white rounded-lg">
+                      <img
+                        src={qrCodeUrl}
+                        alt="QR Code for game share"
+                        className="w-32 h-32"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 text-center">
+                      Share code: <strong>{shareCode}</strong>
+                    </p>
+                  </div>
+                )}
+
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>
+                    💡 Shared users can view and modify this game in real-time.
+                  </p>
+                  <p>🔄 All changes sync automatically across all devices.</p>
+                  <p>⚠️ Only you (the owner) can delete this game.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

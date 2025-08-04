@@ -1,73 +1,140 @@
-'use client'
+"use client";
 
-import { Game, Player } from '@/app/types/game'
-import { motion } from 'framer-motion'
-import { Minus, X } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { Game, Player } from "@/app/types/game";
+import { motion } from "framer-motion";
+import { Minus, X } from "lucide-react";
+import { useCallback, useState, useEffect, useRef } from "react";
 
 interface GamePlayProps {
-  game: Game
-  onUpdateGame: (updatedGame: Game) => void
-  onExitGame: () => void
+  game: Game;
+  onUpdateGame: (updatedGame: Game) => void;
+  onExitGame: () => void;
 }
 
-export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayProps) {
-  const [players, setPlayers] = useState<Player[]>(game.players)
+export default function GamePlay({
+  game,
+  onUpdateGame,
+  onExitGame,
+}: GamePlayProps) {
+  const [players, setPlayers] = useState<Player[]>(game.players);
 
   // Update parent game when exiting
   const updateParentGame = useCallback(() => {
-    const updatedGame = { ...game, players, lastPlayed: new Date() }
-    onUpdateGame(updatedGame)
-  }, [game, players, onUpdateGame])
+    const updatedGame = { ...game, players, lastPlayed: new Date() };
+    onUpdateGame(updatedGame);
+  }, [game, players, onUpdateGame]);
 
-  const incrementScore = useCallback((playerId: string) => {
-    setPlayers(prev => prev.map(player => 
-      player.id === playerId ? { ...player, score: player.score + 1 } : player
-    ))
-  }, [])
+  const incrementScore = useCallback(
+    (playerId: string) => {
+      setPlayers((prev) => {
+        const updatedPlayers = prev.map((player) =>
+          player.id === playerId
+            ? { ...player, score: player.score + 1 }
+            : player
+        );
 
-  const decrementScore = useCallback((playerId: string) => {
-    setPlayers(prev => prev.map(player => 
-      player.id === playerId ? { ...player, score: Math.max(0, player.score - 1) } : player
-    ))
-  }, [])
+        // Auto-save with the updated players immediately
+        const updatedGame = {
+          ...game,
+          players: updatedPlayers,
+          lastPlayed: new Date(),
+        };
 
-  const handleTap = useCallback((playerId: string, event: React.MouseEvent | React.TouchEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
-    incrementScore(playerId)
-  }, [incrementScore])
+        console.log("GamePlay - Auto-saving game (increment):", {
+          gameId: updatedGame.id,
+          playersBeforeSave: updatedPlayers.map((p: any) => ({
+            name: p.name,
+            score: p.score,
+          })),
+          lastPlayed: updatedGame.lastPlayed,
+        });
 
-  const handleDecrement = useCallback((playerId: string, event: React.MouseEvent | React.TouchEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
-    decrementScore(playerId)
-  }, [decrementScore])
+        onUpdateGame(updatedGame);
+
+        return updatedPlayers;
+      });
+    },
+    [game, onUpdateGame]
+  );
+
+  const decrementScore = useCallback(
+    (playerId: string) => {
+      setPlayers((prev) => {
+        const updatedPlayers = prev.map((player) =>
+          player.id === playerId
+            ? { ...player, score: Math.max(0, player.score - 1) }
+            : player
+        );
+
+        // Auto-save with the updated players immediately
+        const updatedGame = {
+          ...game,
+          players: updatedPlayers,
+          lastPlayed: new Date(),
+        };
+
+        console.log("GamePlay - Auto-saving game (decrement):", {
+          gameId: updatedGame.id,
+          playersBeforeSave: updatedPlayers.map((p: any) => ({
+            name: p.name,
+            score: p.score,
+          })),
+          lastPlayed: updatedGame.lastPlayed,
+        });
+
+        onUpdateGame(updatedGame);
+
+        return updatedPlayers;
+      });
+    },
+    [game, onUpdateGame]
+  );
+
+  const handleTap = useCallback(
+    (playerId: string, event: React.MouseEvent | React.TouchEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      incrementScore(playerId);
+    },
+    [incrementScore]
+  );
+
+  const handleDecrement = useCallback(
+    (playerId: string, event: React.MouseEvent | React.TouchEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      decrementScore(playerId);
+    },
+    [decrementScore]
+  );
 
   const getGridLayout = () => {
-    const playerCount = players.length
+    const playerCount = players.length;
     switch (playerCount) {
       case 2:
-        return 'grid-cols-1 grid-rows-2' // Vertical split
+        return "grid-cols-1 grid-rows-2"; // Vertical split
       case 3:
-        return 'grid-cols-1 grid-rows-3' // Vertical thirds
+        return "grid-cols-1 grid-rows-3"; // Vertical thirds
       case 4:
-        return 'grid-cols-2 grid-rows-2' // 2x2 grid
+        return "grid-cols-2 grid-rows-2"; // 2x2 grid
       case 5:
-        return 'grid-cols-2 grid-rows-3' // 2x3 grid with empty space
+        return "grid-cols-2 grid-rows-3"; // 2x3 grid with empty space
       case 6:
-        return 'grid-cols-2 grid-rows-3' // 2x3 grid
+        return "grid-cols-2 grid-rows-3"; // 2x3 grid
       default:
-        return 'grid-cols-2 grid-rows-2'
+        return "grid-cols-2 grid-rows-2";
     }
-  }
+  };
 
   // Exit game handler
-  const handleExit = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    updateParentGame() // Save current state before exiting
-    onExitGame()
-  }, [onExitGame, updateParentGame])
+  const handleExit = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      updateParentGame(); // Save current state before exiting
+      onExitGame();
+    },
+    [onExitGame, updateParentGame]
+  );
 
   return (
     <div className="fixed inset-0 select-none overflow-hidden">
@@ -121,7 +188,6 @@ export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayPro
                 {player.score}
               </div>
             </motion.div>
-
           </motion.div>
         ))}
 
@@ -131,5 +197,5 @@ export default function GamePlay({ game, onUpdateGame, onExitGame }: GamePlayPro
         )}
       </div>
     </div>
-  )
+  );
 }
