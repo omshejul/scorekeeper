@@ -3,14 +3,18 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Loader } from "lucide-react";
+import { useState } from "react";
 
 export function AuthButton() {
   const { data: session, status } = useSession();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (status === "loading") {
     return (
-      <Button variant="outline" disabled>
+      <Button variant="outline" disabled className="flex items-center gap-2">
+        <Loader className="w-4 h-4 animate-spin" />
         Loading...
       </Button>
     );
@@ -39,11 +43,28 @@ export function AuthButton() {
         <Button
           variant={"outline"}
           size="sm"
-          onClick={() => signOut()}
+          onClick={async () => {
+            setIsSigningOut(true);
+            try {
+              await signOut();
+            } finally {
+              setIsSigningOut(false);
+            }
+          }}
+          disabled={isSigningOut}
           className="flex items-center gap-2"
         >
-          <LogOut className="w-4 h-4" />
-          Sign Out
+          {isSigningOut ? (
+            <>
+              <Loader className="w-4 h-4 animate-spin" />
+              Signing Out...
+            </>
+          ) : (
+            <>
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </>
+          )}
         </Button>
       </div>
     );
@@ -53,11 +74,28 @@ export function AuthButton() {
     <div className="flex flex-col items-center gap-2 w-full">
       <Button
         variant="outline"
-        onClick={() => signIn("google")}
+        onClick={async () => {
+          setIsSigningIn(true);
+          try {
+            await signIn("google");
+          } finally {
+            setIsSigningIn(false);
+          }
+        }}
+        disabled={isSigningIn}
         className="flex items-center gap-2"
       >
-        <img src="/google.webp" alt="Google logo" className="w-4 h-4" />
-        Sign In
+        {isSigningIn ? (
+          <>
+            <Loader className="w-4 h-4 animate-spin" />
+            Signing In...
+          </>
+        ) : (
+          <>
+            <img src="/google.webp" alt="Google logo" className="w-4 h-4" />
+            Sign In
+          </>
+        )}
       </Button>
       <span className="text-xs text-center w-full text-gray-500 whitespace-nowrap">
         Sign in to save and share your scores
