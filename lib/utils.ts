@@ -45,7 +45,8 @@ export function generatePlayerNames(count: number): string[] {
   }
 
   // Add indices to make them unique and numbered
-  return baseNames.map((name, index) => `${name} ${index + 1}`);
+  // return baseNames.map((name, index) => `${name} ${index + 1}`);
+  return baseNames.map((name) => `${name}`);
 }
 
 /**

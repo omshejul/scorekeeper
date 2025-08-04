@@ -189,7 +189,7 @@ export default function GameSetup({
                       className="flex items-center gap-2"
                     >
                       <Dice5 className="w-4 h-4" />
-                      Generate New Names
+                      Generate Random Names
                     </Button>
                   </div>
 
