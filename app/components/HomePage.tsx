@@ -29,8 +29,8 @@ export default function HomePage({
   currentUserEmail,
 }: HomePageProps) {
   return (
-    <div className="min-h-screen p-6">
-      <div className="fixed z-10 py-2 px-4 backdrop-blur-sm rounded-md left-1/2 bottom-0 -translate-x-1/2 -translate-y-1/2">
+    <div className="min-h-[80vh] p-6">
+      <div className="fixed z-10 py-2 px-4 rounded-md left-1/2 bottom-0 -translate-x-1/2">
         <AuthButton />
       </div>
       <div className="max-w-4xl mx-auto mb-32">

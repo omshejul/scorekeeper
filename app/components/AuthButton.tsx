@@ -18,7 +18,7 @@ export function AuthButton() {
 
   if (session) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center bg-background/50 backdrop-blur-lg py-1 px-3 rounded-md justify-center gap-3">
         <div className="flex items-center gap-2 text-sm">
           <Avatar className="w-6 h-6">
             <AvatarImage src={session.user?.image || ""} />
@@ -32,10 +32,12 @@ export function AuthButton() {
                 : session.user?.email?.[0]?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
-          <span className="whitespace-nowrap">{session.user?.name || session.user?.email}</span>
+          <span className="whitespace-nowrap">
+            {session.user?.name || session.user?.email}
+          </span>
         </div>
         <Button
-          variant="outline"
+          variant={"outline"}
           size="sm"
           onClick={() => signOut()}
           className="flex items-center gap-2"
@@ -48,13 +50,18 @@ export function AuthButton() {
   }
 
   return (
-    <Button
-      variant="outline"
-      onClick={() => signIn("google")}
-      className="flex items-center gap-2"
-    >
-      <img src="/google.svg" alt="Google logo" className="w-4 h-4" />
-      Sign In to save and share your scores
-    </Button>
+    <div className="flex flex-col items-center gap-2 w-full">
+      <Button
+        variant="outline"
+        onClick={() => signIn("google")}
+        className="flex items-center gap-2"
+      >
+        <img src="/google.svg" alt="Google logo" className="w-4 h-4" />
+        Sign In
+      </Button>
+      <span className="text-xs text-center w-full text-gray-500 whitespace-nowrap">
+        Sign in to save and share your scores
+      </span>
+    </div>
   );
 }
