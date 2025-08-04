@@ -235,7 +235,7 @@ export default function GamePlay({
             {/* Minus Button */}
             <motion.button
               className={`absolute ${
-                isRotated ? "bottom-3 left-3" : "top-3 left-3"
+                isRotated ? "bottom-6 left-6" : "top-3 left-3"
               } w-8 h-8 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-sm z-10 transition-all duration-200`}
               onClick={(e) => handleDecrement(player.id, e)}
               whileHover={{ scale: 1.1 }}
@@ -252,9 +252,9 @@ export default function GamePlay({
 
             {/* Player Name */}
             <div
-              className={`absolute ${
+              className={`absolute w-32 text-center ${
                 isRotated
-                  ? "z-10 -left-3 top-1/2 transform -translate-y-1/2"
+                  ? "z-10 -left-8"
                   : "z-10 top-3 right-1/2 transform translate-x-1/2"
               }`}
               style={{
@@ -262,7 +262,7 @@ export default function GamePlay({
               }}
             >
               <div
-                className=" text-black/30 px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm"
+                className=" text-black/30 px-3 py-1 rounded-full text-sm font-semibold "
                 style={{
                   transform: isRotated ? "rotate(-90deg)" : "rotate(0deg)",
                   transition: "transform 0.3s ease-in-out",
