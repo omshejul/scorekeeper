@@ -56,7 +56,7 @@ export function AuthButton() {
         onClick={() => signIn("google")}
         className="flex items-center gap-2"
       >
-        <img src="/google.svg" alt="Google logo" className="w-4 h-4" />
+        <img src="/google.webp" alt="Google logo" className="w-4 h-4" />
         Sign In
       </Button>
       <span className="text-xs text-center w-full text-gray-500 whitespace-nowrap">
