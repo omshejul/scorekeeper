@@ -156,24 +156,27 @@ export default function HomePage({
                       </div>
 
                       <div className="flex justify-between sm:justify-start gap-2 sm:ml-4 w-full sm:w-auto">
-                        <Button
-                          onClick={() => onPlayGame(game)}
-                          className="gap-1 sm:gap-2 text-sm w-20"
-                        >
-                          <Play className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span>Play</span>
-                        </Button>
-                        {/* Only show share button if user owns the game */}
-                        {game.userEmail === currentUserEmail && (
+                        <div className="flex gap-2">
                           <Button
-                            onClick={() => onShareGame(game)}
-                            variant="outline"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            title="Share game"
+                            onClick={() => onPlayGame(game)}
+                            className="gap-1 sm:gap-2 text-sm w-20"
                           >
-                            <Share2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span>Play</span>
                           </Button>
-                        )}
+                          {/* Only show share button if user owns the game */}
+                          {game.userEmail === currentUserEmail && (
+                            <Button
+                              onClick={() => onShareGame(game)}
+                              variant="outline"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              title="Share game"
+                            >
+                              <Share2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </Button>
+                          )}
+                        </div>
+
                         {/* Only show delete button if user owns the game */}
                         {game.userEmail === currentUserEmail && (
                           <Button
