@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Palette, Play, Users } from "lucide-react";
+import { ArrowLeft, Palette, Play, Users, Dice5 } from "lucide-react";
 import { useState } from "react";
+import { generatePlayerNames, generateGameName } from "@/lib/utils";
 
 interface GameSetupProps {
   onBack: () => void;
@@ -21,18 +22,26 @@ export default function GameSetup({
 }: GameSetupProps) {
   const [step, setStep] = useState<"count" | "names" | "colors">("count");
   const [playerCount, setPlayerCount] = useState(2);
-  const [gameName, setGameName] = useState("");
-  const [playerNames, setPlayerNames] = useState<string[]>([
-    "Player 1",
-    "Player 2",
-  ]);
+  const [gameName, setGameName] = useState(() => generateGameName());
+  const [playerNames, setPlayerNames] = useState<string[]>(() =>
+    generatePlayerNames(2)
+  );
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const handlePlayerCountChange = (count: number) => {
     setPlayerCount(count);
-    const names = Array.from({ length: count }, (_, i) => `Player ${i + 1}`);
+    const names = generatePlayerNames(count);
     setPlayerNames(names);
     setSelectedColors([]);
+  };
+
+  const handleGenerateNewNames = () => {
+    const names = generatePlayerNames(playerCount);
+    setPlayerNames(names);
+  };
+
+  const handleGenerateNewGameName = () => {
+    setGameName(generateGameName());
   };
 
   const handleNameChange = (index: number, name: string) => {
@@ -109,12 +118,21 @@ export default function GameSetup({
                     <label className="block text-sm font-medium mb-2">
                       Game Name
                     </label>
-                    <Input
-                      value={gameName}
-                      onChange={(e) => setGameName(e.target.value)}
-                      placeholder="Enter game name..."
-                      className="text-lg"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        value={gameName}
+                        onChange={(e) => setGameName(e.target.value)}
+                        placeholder="Enter game name..."
+                        className="text-lg flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={handleGenerateNewGameName}
+                        className="flex items-center gap-2"
+                      >
+                        <Dice5 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Player Count */}
@@ -163,6 +181,18 @@ export default function GameSetup({
                   <CardTitle>Player Names</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Generate New Names Button */}
+                  <div className="flex justify-center mb-4">
+                    <Button
+                      variant="outline"
+                      onClick={handleGenerateNewNames}
+                      className="flex items-center gap-2"
+                    >
+                      <Dice5 className="w-4 h-4" />
+                      Generate New Names
+                    </Button>
+                  </div>
+
                   {playerNames.map((name, index) => (
                     <div key={index}>
                       <label className="block text-sm font-medium mb-2">

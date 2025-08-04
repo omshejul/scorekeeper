@@ -54,7 +54,7 @@ export function AuthButton() {
       className="flex items-center gap-2"
     >
       <img src="/google.svg" alt="Google logo" className="w-4 h-4" />
-      Sign In
+      Sign In to save and share your scores
     </Button>
   );
 }

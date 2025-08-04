@@ -29,7 +29,7 @@ export default function HomePage({
   currentUserEmail,
 }: HomePageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
+    <div className="min-h-screen p-6">
       <div className="fixed z-10 py-2 px-4 backdrop-blur-sm rounded-md left-1/2 bottom-0 -translate-x-1/2 -translate-y-1/2">
         <AuthButton />
       </div>
