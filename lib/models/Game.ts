@@ -50,9 +50,12 @@ const GameSchema = new Schema<IGame>(
 );
 
 // Create indexes for better query performance
+// Fetch “my games” sorted by lastPlayed
 GameSchema.index({ userId: 1, lastPlayed: -1 });
-GameSchema.index({ userEmail: 1 });
-GameSchema.index({ sharedWith: 1 });
+GameSchema.index({ sharedWith: 1, lastPlayed: -1 });
+
+// Full-text search on game names and player names
+GameSchema.index({ name: "text", "players.name": "text" });
 
 export default mongoose.models.Game ||
   mongoose.model<IGame>("Game", GameSchema);
