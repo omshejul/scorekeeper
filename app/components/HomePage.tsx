@@ -30,14 +30,14 @@ export default function HomePage({
 }: HomePageProps) {
   return (
     <div className="min-h-[80vh] p-6">
-      <div className="fixed z-10 py-2 px-4 mb-2 rounded-md left-1/2 bottom-0 -translate-x-1/2">
+      <div className="fixed z-10 py-2 px-4 rounded-md left-1/2 bottom-0 -translate-x-1/2">
         <AuthButton />
       </div>
       <div className="max-w-4xl mx-auto mb-16">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           className="mb-8"
         >
           <div className="flex justify-between items-start mb-6">
@@ -54,9 +54,9 @@ export default function HomePage({
 
         {/* Add New Game Button */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
+          initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ delay: 0.1, duration: 0.2 }}
           className="mb-8"
         >
           <Button
@@ -72,8 +72,8 @@ export default function HomePage({
         {/* Games List */}
         {loading ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ delay: 0.2 }}
             className="text-center py-12"
           >
@@ -95,8 +95,8 @@ export default function HomePage({
           </motion.div>
         ) : games.length === 0 ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ delay: 0.2 }}
             className="text-center py-12"
           >
@@ -115,9 +115,9 @@ export default function HomePage({
             {games.map((game, index) => (
               <motion.div
                 key={game.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.05 }}
+                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ delay: 0.1 + index * 0.05, duration: 0.2 }}
               >
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                   <CardContent>

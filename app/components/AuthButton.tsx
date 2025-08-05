@@ -22,7 +22,7 @@ export function AuthButton() {
 
   if (session) {
     return (
-      <div className="flex items-center bg-background/50 backdrop-blur-lg py-2 px-2 rounded-full justify-center gap-3">
+      <div className="flex items-center border border-background/50 bg-background/50 backdrop-blur-md py-2 px-2.5 rounded-full justify-center gap-3">
         <div className="flex items-center gap-2 text-sm">
           <Avatar className="w-8 h-8">
             <AvatarImage src={session.user?.image || ""} />

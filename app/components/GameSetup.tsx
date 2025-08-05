@@ -85,8 +85,8 @@ export default function GameSetup({
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           className="flex items-center gap-4 mb-8"
         >
           <Button variant="outline" size="sm" onClick={onBack}>
@@ -101,9 +101,9 @@ export default function GameSetup({
           {step === "count" && (
             <motion.div
               key="count"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
             >
               <Card>
                 <CardHeader>
@@ -172,9 +172,9 @@ export default function GameSetup({
           {step === "names" && (
             <motion.div
               key="names"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
             >
               <Card>
                 <CardHeader>
@@ -233,9 +233,9 @@ export default function GameSetup({
           {step === "colors" && (
             <motion.div
               key="colors"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
             >
               <Card>
                 <CardHeader>
