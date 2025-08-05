@@ -228,8 +228,8 @@ export default function GamePlay({
             className="relative flex items-center justify-center cursor-pointer user-select-none touch-manipulation"
             style={{ backgroundColor: player.color }}
             onClick={(e) => handleTap(player.id, e)}
-            initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1, duration: 0.2 }}
           >
             {/* Minus Button */}
@@ -275,9 +275,9 @@ export default function GamePlay({
             {/* Score */}
             <motion.div
               key={player.score}
-              initial={{ scale: 1.2, opacity: 0.7, filter: "blur(10px)" }}
-              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-              transition={{ duration: 0.2, delay: index * 0.1 }}
+              initial={{ scale: 1.2, opacity: 0.7 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className="text-white text-center"
             >
               <div
