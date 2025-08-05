@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Palette, Play, Users, Dice5 } from "lucide-react";
 import { useState } from "react";
 import { generatePlayerNames, generateGameName } from "@/lib/utils";
+import DecryptedText from "@/components/ui/DecryptedText";
 
 interface GameSetupProps {
   onBack: () => void;
@@ -30,6 +31,9 @@ export default function GameSetup({
   const [isGameNameDiceRotating, setIsGameNameDiceRotating] = useState(false);
   const [isPlayerNamesDiceRotating, setIsPlayerNamesDiceRotating] =
     useState(false);
+  const [showDecryptedGameName, setShowDecryptedGameName] = useState(false);
+  const [showDecryptedPlayerNames, setShowDecryptedPlayerNames] =
+    useState(false);
 
   const handlePlayerCountChange = (count: number) => {
     setPlayerCount(count);
@@ -42,12 +46,18 @@ export default function GameSetup({
     e.preventDefault();
     e.stopPropagation();
     setIsPlayerNamesDiceRotating(true);
+    setShowDecryptedPlayerNames(true);
+
     const names = generatePlayerNames(playerCount);
     setPlayerNames(names);
 
     // Reset rotation state after animation completes
     setTimeout(() => {
       setIsPlayerNamesDiceRotating(false);
+      // Hide decryption animation after a delay
+      setTimeout(() => {
+        setShowDecryptedPlayerNames(false);
+      }, 500);
     }, 600);
   };
 
@@ -55,11 +65,18 @@ export default function GameSetup({
     e.preventDefault();
     e.stopPropagation();
     setIsGameNameDiceRotating(true);
-    setGameName(generateGameName());
+    setShowDecryptedGameName(true);
+
+    const newGameName = generateGameName();
+    setGameName(newGameName);
 
     // Reset rotation state after animation completes
     setTimeout(() => {
       setIsGameNameDiceRotating(false);
+      // Hide decryption animation after a delay
+      setTimeout(() => {
+        setShowDecryptedGameName(false);
+      }, 500);
     }, 600);
   };
 
@@ -138,12 +155,25 @@ export default function GameSetup({
                       Game Name
                     </label>
                     <div className="flex gap-2">
-                      <Input
-                        value={gameName}
-                        onChange={(e) => setGameName(e.target.value)}
-                        placeholder="Enter game name..."
-                        className="text-lg flex-1"
-                      />
+                      {showDecryptedGameName ? (
+                        <div className="flex-1 border border-input bg-background px-3 py-1 rounded-md h-9 flex items-center">
+                          <DecryptedText
+                            text={gameName}
+                            speed={50}
+                            maxIterations={10}
+                            sequential={true}
+                            animateOn="view"
+                            className="text-base md:text-sm"
+                          />
+                        </div>
+                      ) : (
+                        <Input
+                          value={gameName}
+                          onChange={(e) => setGameName(e.target.value)}
+                          placeholder="Enter game name..."
+                          className="flex-1"
+                        />
+                      )}
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.75 }}
@@ -151,6 +181,7 @@ export default function GameSetup({
                         <Button
                           variant="outline"
                           onClick={handleGenerateNewGameName}
+                          disabled={showDecryptedGameName}
                           className="flex items-center gap-2"
                         >
                           <motion.div
@@ -222,6 +253,7 @@ export default function GameSetup({
                     >
                       <Button
                         onClick={handleGenerateNewNames}
+                        disabled={showDecryptedPlayerNames}
                         className="flex items-center gap-2"
                       >
                         <motion.div
@@ -244,14 +276,26 @@ export default function GameSetup({
                       <label className="block text-sm font-medium mb-2">
                         Player {index + 1}
                       </label>
-                      <Input
-                        value={name}
-                        onChange={(e) =>
-                          handleNameChange(index, e.target.value)
-                        }
-                        placeholder={`Player ${index + 1} name...`}
-                        className="text-lg"
-                      />
+                      {showDecryptedPlayerNames ? (
+                        <div className="border border-input bg-background px-3 py-1 rounded-md h-9 flex items-center">
+                          <DecryptedText
+                            text={name}
+                            speed={50}
+                            maxIterations={8}
+                            sequential={false}
+                            animateOn="view"
+                            className="text-base md:text-sm"
+                          />
+                        </div>
+                      ) : (
+                        <Input
+                          value={name}
+                          onChange={(e) =>
+                            handleNameChange(index, e.target.value)
+                          }
+                          placeholder={`Player ${index + 1} name...`}
+                        />
+                      )}
                     </div>
                   ))}
 
