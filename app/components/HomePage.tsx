@@ -30,10 +30,10 @@ export default function HomePage({
 }: HomePageProps) {
   return (
     <div className="min-h-[80vh] p-6">
-      <div className="fixed z-10 py-2 px-4 rounded-md left-1/2 bottom-0 -translate-x-1/2">
+      <div className="fixed z-10 py-2 px-4 mb-2 rounded-md left-1/2 bottom-0 -translate-x-1/2">
         <AuthButton />
       </div>
-      <div className="max-w-4xl mx-auto mb-32">
+      <div className="max-w-4xl mx-auto mb-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

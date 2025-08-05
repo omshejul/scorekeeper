@@ -22,9 +22,9 @@ export function AuthButton() {
 
   if (session) {
     return (
-      <div className="flex items-center bg-background/50 backdrop-blur-lg py-3 px-5 rounded-full justify-center gap-3">
+      <div className="flex items-center bg-background/50 backdrop-blur-lg py-2 px-2 rounded-full justify-center gap-3">
         <div className="flex items-center gap-2 text-sm">
-          <Avatar className="w-6 h-6">
+          <Avatar className="w-8 h-8">
             <AvatarImage src={session.user?.image || ""} />
             <AvatarFallback>
               {session.user?.name
@@ -52,7 +52,7 @@ export function AuthButton() {
             }
           }}
           disabled={isSigningOut}
-          className="flex items-center gap-2"
+          className="flex items-center rounded-full gap-2"
         >
           {isSigningOut ? (
             <>
@@ -83,7 +83,7 @@ export function AuthButton() {
           }
         }}
         disabled={isSigningIn}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 rounded-full"
       >
         {isSigningIn ? (
           <>
