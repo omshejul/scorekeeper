@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import connectToDatabase from "@/lib/mongodb";
 import Game from "@/lib/models/Game";
 import { authOptions } from "@/lib/auth";
+import { sendGameInvites } from "@/lib/email";
 
 // POST /api/games/[gameId]/share - Share a game with other users
 export async function POST(
@@ -60,11 +61,33 @@ export async function POST(
       { new: true }
     );
 
+    // Send invitation emails
+    const shareUrl = `${process.env.NEXTAUTH_URL}`;
+    const inviterName = session.user?.name || userEmail.split("@")[0];
+
+    let emailResults = { successful: 0, failed: 0, results: [] as any[] };
+
+    try {
+      emailResults = await sendGameInvites(emails, {
+        inviterName,
+        inviterEmail: userEmail,
+        gameName: game.name || "ScoreKeeper Game",
+        gameUrl: shareUrl,
+      });
+    } catch (error) {
+      console.error("Error sending invitation emails:", error);
+      // Continue with the response even if emails fail
+    }
+
     return NextResponse.json({
       message: "Game shared successfully",
       shareCode: shareCode,
       sharedWith: updatedGame?.sharedWith || [],
-      shareUrl: `${process.env.NEXTAUTH_URL}?join=${shareCode}`,
+      shareUrl: shareUrl,
+      emailResults: {
+        successful: emailResults.successful,
+        failed: emailResults.failed,
+      },
     });
   } catch (error) {
     console.error("Error sharing game:", error);

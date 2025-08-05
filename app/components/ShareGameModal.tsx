@@ -26,6 +26,10 @@ export default function ShareGameModal({
   const [sharedWith, setSharedWith] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [qrCodeLoading, setQrCodeLoading] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<{
+    successful: number;
+    failed: number;
+  } | null>(null);
 
   useEffect(() => {
     if (game && isOpen) {
@@ -74,6 +78,13 @@ export default function ShareGameModal({
         setSharedWith(data.sharedWith);
         setShareUrl(window.location.origin);
         setNewEmail("");
+
+        // Show email status if available
+        if (data.emailResults) {
+          setEmailStatus(data.emailResults);
+          // Clear status after 5 seconds
+          setTimeout(() => setEmailStatus(null), 5000);
+        }
       } else {
         const error = await response.json();
         alert(error.error || "Failed to share game");
@@ -164,9 +175,37 @@ export default function ShareGameModal({
                       disabled={loading || !newEmail.trim()}
                       className="shrink-0"
                     >
-                      <Plus className="w-4 h-4" />
+                      {loading ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
+
+                  {/* Email Status */}
+                  {emailStatus && (
+                    <div
+                      className={`text-sm p-2 rounded-md ${
+                        emailStatus.failed > 0
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : "bg-green-50 text-green-700 border border-green-200"
+                      }`}
+                    >
+                      {emailStatus.successful > 0 && (
+                        <p>
+                          ✅ Successfully sent {emailStatus.successful}{" "}
+                          invitation email(s)
+                        </p>
+                      )}
+                      {emailStatus.failed > 0 && (
+                        <p>
+                          ❌ Failed to send {emailStatus.failed} invitation
+                          email(s)
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Currently Shared With */}
