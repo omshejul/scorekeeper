@@ -27,6 +27,9 @@ export default function GameSetup({
     Array(2).fill("")
   );
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [isGameNameDiceRotating, setIsGameNameDiceRotating] = useState(false);
+  const [isPlayerNamesDiceRotating, setIsPlayerNamesDiceRotating] =
+    useState(false);
 
   const handlePlayerCountChange = (count: number) => {
     setPlayerCount(count);
@@ -35,13 +38,29 @@ export default function GameSetup({
     setSelectedColors([]);
   };
 
-  const handleGenerateNewNames = () => {
+  const handleGenerateNewNames = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsPlayerNamesDiceRotating(true);
     const names = generatePlayerNames(playerCount);
     setPlayerNames(names);
+
+    // Reset rotation state after animation completes
+    setTimeout(() => {
+      setIsPlayerNamesDiceRotating(false);
+    }, 600);
   };
 
-  const handleGenerateNewGameName = () => {
+  const handleGenerateNewGameName = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsGameNameDiceRotating(true);
     setGameName(generateGameName());
+
+    // Reset rotation state after animation completes
+    setTimeout(() => {
+      setIsGameNameDiceRotating(false);
+    }, 600);
   };
 
   const handleNameChange = (index: number, name: string) => {
@@ -125,13 +144,27 @@ export default function GameSetup({
                         placeholder="Enter game name..."
                         className="text-lg flex-1"
                       />
-                      <Button
-                        variant="outline"
-                        onClick={handleGenerateNewGameName}
-                        className="flex items-center gap-2"
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.75 }}
                       >
-                        <Dice5 className="w-4 h-4" />
-                      </Button>
+                        <Button
+                          variant="outline"
+                          onClick={handleGenerateNewGameName}
+                          className="flex items-center gap-2"
+                        >
+                          <motion.div
+                            key={isGameNameDiceRotating ? "rotating" : "idle"}
+                            initial={{ rotate: 0 }}
+                            animate={{
+                              rotate: isGameNameDiceRotating ? 360 : 0,
+                            }}
+                            transition={{ duration: 0.6, ease: "easeInOut" }}
+                          >
+                            <Dice5 className="w-4 h-4" />
+                          </motion.div>
+                        </Button>
+                      </motion.div>
                     </div>
                   </div>
 
@@ -183,14 +216,27 @@ export default function GameSetup({
                 <CardContent className="space-y-4">
                   {/* Generate New Names Button */}
                   <div className="flex justify-center mb-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleGenerateNewNames}
-                      className="flex items-center gap-2"
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <Dice5 className="w-4 h-4" />
-                      Generate Random Names
-                    </Button>
+                      <Button
+                        onClick={handleGenerateNewNames}
+                        className="flex items-center gap-2"
+                      >
+                        <motion.div
+                          key={isPlayerNamesDiceRotating ? "rotating" : "idle"}
+                          initial={{ rotate: 0 }}
+                          animate={{
+                            rotate: isPlayerNamesDiceRotating ? 360 : 0,
+                          }}
+                          transition={{ duration: 0.6, ease: "easeInOut" }}
+                        >
+                          <Dice5 className="w-4 h-4" />
+                        </motion.div>
+                        Generate Random Names
+                      </Button>
+                    </motion.div>
                   </div>
 
                   {playerNames.map((name, index) => (
