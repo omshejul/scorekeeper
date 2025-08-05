@@ -42,7 +42,7 @@ export default function HomePage({
         >
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-2">
+              <h1 className="font-display text-4xl font-bold text-gray-800 dark:text-white mb-2">
                 Score Keeper
               </h1>
               <p className="text-gray-600 dark:text-gray-300">

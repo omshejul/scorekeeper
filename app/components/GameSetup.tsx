@@ -128,7 +128,7 @@ export default function GameSetup({
           <Button variant="outline" size="sm" onClick={onBack}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          <h1 className="font-display text-3xl font-bold text-gray-800 dark:text-white">
             New Game Setup
           </h1>
         </motion.div>
