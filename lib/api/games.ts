@@ -3,7 +3,9 @@ import { Game, Player } from "@/app/types/game";
 const API_BASE = "/api/games";
 
 export async function fetchGames(): Promise<Game[]> {
-  const response = await fetch(API_BASE);
+  const response = await fetch(API_BASE, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch games");
@@ -20,7 +22,9 @@ export async function fetchGames(): Promise<Game[]> {
 }
 
 export async function fetchGame(gameId: string): Promise<Game> {
-  const response = await fetch(`${API_BASE}/${gameId}`);
+  const response = await fetch(`${API_BASE}/${gameId}`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch game");
@@ -45,6 +49,7 @@ export async function createGame(gameData: {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(gameData),
   });
 
@@ -80,6 +85,7 @@ export async function updateGame(
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(gameData),
   });
 
@@ -115,6 +121,7 @@ export async function updateGame(
 export async function deleteGame(gameId: string): Promise<void> {
   const response = await fetch(`${API_BASE}/${gameId}`, {
     method: "DELETE",
+    credentials: "include",
   });
 
   if (!response.ok) {

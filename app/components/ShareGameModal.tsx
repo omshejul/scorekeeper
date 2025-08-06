@@ -34,7 +34,9 @@ export default function ShareGameModal({
     if (!game) return;
 
     try {
-      const response = await fetch(`/api/games/${game.id}/share`);
+      const response = await fetch(`/api/games/${game.id}/share`, {
+        credentials: "include",
+      });
       if (response.ok) {
         const data = await response.json();
         setSharedWith(data.sharedWith || []);
@@ -66,6 +68,7 @@ export default function ShareGameModal({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           emails: [newEmail.trim()],
         }),
