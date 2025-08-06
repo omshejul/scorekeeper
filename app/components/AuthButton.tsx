@@ -29,14 +29,31 @@ export function AuthButton() {
         <div className="flex items-center gap-2 text-sm">
           <Avatar className="w-8 h-8">
             <AvatarImage src={session.user?.image || ""} />
-            <AvatarFallback>
-              {session.user?.name
-                ? session.user.name
+            <AvatarFallback className="bg-gray-100 flex items-center justify-center">
+              {session.user?.image ? (
+                // If user has an image, show it normally
+                session.user.name ? (
+                  session.user.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")
                     .toUpperCase()
-                : session.user?.email?.[0]?.toUpperCase() || "U"}
+                ) : (
+                  session.user.email?.[0]?.toUpperCase() || "U"
+                )
+              ) : // If no image, check if it's Apple auth by looking at email domain or provider
+              session.user?.email?.includes("@privaterelay.appleid.com") ||
+                session.user?.email?.includes("@icloud.com") ? (
+                <FaApple className="w-4 h-4 text-gray-900" />
+              ) : session.user?.name ? (
+                session.user.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()
+              ) : (
+                session.user?.email?.[0]?.toUpperCase() || "U"
+              )}
             </AvatarFallback>
           </Avatar>
           <span className="whitespace-nowrap">
