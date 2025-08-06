@@ -128,7 +128,7 @@ export default function GameSetup({
           <Button variant="outline" size="sm" onClick={onBack}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="font-display text-3xl font-bold text-gray-800 dark:text-white">
+          <h1 className="font-display text-2xl font-bold text-gray-800 dark:text-white">
             New Game Setup
           </h1>
         </motion.div>
@@ -155,25 +155,41 @@ export default function GameSetup({
                       Game Name
                     </label>
                     <div className="flex gap-2">
-                      {showDecryptedGameName ? (
-                        <div className="flex-1 border border-input bg-background px-3 py-1 rounded-md h-9 flex items-center">
-                          <DecryptedText
-                            text={gameName}
-                            speed={50}
-                            maxIterations={10}
-                            sequential={true}
-                            animateOn="view"
-                            className="text-base md:text-sm"
-                          />
-                        </div>
-                      ) : (
-                        <Input
-                          value={gameName}
-                          onChange={(e) => setGameName(e.target.value)}
-                          placeholder="Enter game name..."
-                          className="flex-1"
-                        />
-                      )}
+                      <AnimatePresence mode="wait">
+                        {showDecryptedGameName ? (
+                          <motion.div
+                            key="game-decrypted"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex-1 border border-input bg-background px-3 py-1 rounded-md h-9 flex items-center"
+                          >
+                            <DecryptedText
+                              text={gameName}
+                              speed={50}
+                              maxIterations={10}
+                              sequential={true}
+                              animateOn="view"
+                              className="text-base md:text-sm"
+                            />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="game-input"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex-1 w-full"
+                          >
+                            <Input
+                              value={gameName}
+                              onChange={(e) => setGameName(e.target.value)}
+                              placeholder="Enter game name..."
+                              className="flex-1 w-full"
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.75 }}
@@ -276,26 +292,41 @@ export default function GameSetup({
                       <label className="block text-sm font-medium mb-2">
                         Player {index + 1}
                       </label>
-                      {showDecryptedPlayerNames ? (
-                        <div className="border border-input bg-background px-3 py-1 rounded-md h-9 flex items-center">
-                          <DecryptedText
-                            text={name}
-                            speed={50}
-                            maxIterations={8}
-                            sequential={false}
-                            animateOn="view"
-                            className="text-base md:text-sm"
-                          />
-                        </div>
-                      ) : (
-                        <Input
-                          value={name}
-                          onChange={(e) =>
-                            handleNameChange(index, e.target.value)
-                          }
-                          placeholder={`Player ${index + 1} name...`}
-                        />
-                      )}
+                      <AnimatePresence mode="wait">
+                        {showDecryptedPlayerNames ? (
+                          <motion.div
+                            key="player-decrypted"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="border border-input px-3 py-1 rounded-md h-9 flex items-center"
+                          >
+                            <DecryptedText
+                              text={name}
+                              speed={50}
+                              maxIterations={8}
+                              sequential={true}
+                              animateOn="view"
+                              className="text-base md:text-sm text-neutral-500"
+                            />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="player-input"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            <Input
+                              value={name}
+                              onChange={(e) =>
+                                handleNameChange(index, e.target.value)
+                              }
+                              placeholder={`Player ${index + 1} name...`}
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   ))}
 

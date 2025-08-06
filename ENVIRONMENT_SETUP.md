@@ -14,6 +14,12 @@ NEXTAUTH_SECRET=your-secret-key-here
 GOOGLE_CLIENT_ID=your-google-client-id-here
 GOOGLE_CLIENT_SECRET=your-google-client-secret-here
 
+# Apple OAuth Configuration
+APPLE_CLIENT_ID=your-apple-service-id-here
+APPLE_TEAM_ID=your-apple-team-id-here
+APPLE_KEY_ID=your-apple-key-id-here
+APPLE_PRIVATE_KEY=your-apple-private-key-here
+
 # MongoDB Configuration - Updated to use separate database name
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_NAME=scorekeeper

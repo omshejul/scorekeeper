@@ -4,6 +4,18 @@ import connectToDatabase from "@/lib/mongodb";
 import Game from "@/lib/models/Game";
 import { authOptions } from "@/lib/auth";
 
+// Extended session type to include the id property added by our auth config
+interface ExtendedUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+}
+
 // POST /api/games/join - Join a shared game using share code
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user is already in the shared list or is the owner
     if (
-      game.userId === (session.user as any).id ||
+      game.userId === (session as unknown as ExtendedSession).user.id ||
       game.sharedWith?.includes(userEmail)
     ) {
       return NextResponse.json({

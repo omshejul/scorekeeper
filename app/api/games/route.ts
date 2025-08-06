@@ -4,6 +4,18 @@ import connectToDatabase from "@/lib/mongodb";
 import Game from "@/lib/models/Game";
 import { authOptions } from "@/lib/auth";
 
+// Extended session type to include the id property added by our auth config
+interface ExtendedUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+}
+
 // GET /api/games - Get all games for the authenticated user
 export async function GET() {
   try {
@@ -15,7 +27,7 @@ export async function GET() {
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
+    const userId = (session as unknown as ExtendedSession).user.id;
     const userEmail = session.user?.email || "";
 
     // Find games owned by user OR shared with user
@@ -47,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
+    const userId = (session as unknown as ExtendedSession).user.id;
     const userName = session.user?.name || "";
     const userEmail = session.user?.email || "";
 

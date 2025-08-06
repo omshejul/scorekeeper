@@ -1,11 +1,20 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    AppleProvider({
+      clientId: process.env.APPLE_CLIENT_ID!,
+      clientSecret: {
+        teamId: process.env.APPLE_TEAM_ID!,
+        privateKey: process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+        keyId: process.env.APPLE_KEY_ID!,
+      } as unknown as string,
     }),
   ],
   callbacks: {

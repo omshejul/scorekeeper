@@ -4,6 +4,18 @@ import connectToDatabase from "@/lib/mongodb";
 import Game from "@/lib/models/Game";
 import { authOptions } from "@/lib/auth";
 
+// Extended session type to include the id property added by our auth config
+interface ExtendedUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+}
+
 // GET /api/games/[gameId] - Get a single game
 export async function GET(
   request: NextRequest,
@@ -20,7 +32,7 @@ export async function GET(
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
+    const userId = (session as unknown as ExtendedSession).user.id;
     const userEmail = session.user?.email || "";
 
     // Find game that user owns OR has shared access to
@@ -68,8 +80,7 @@ export async function PUT(
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
-    const userName = session.user?.name || "";
+    const userId = (session as unknown as ExtendedSession).user.id;
     const userEmail = session.user?.email || "";
 
     // DEBUG: Log the query criteria
@@ -145,8 +156,7 @@ export async function DELETE(
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
-    const userEmail = session.user?.email || "";
+    const userId = (session as unknown as ExtendedSession).user.id;
 
     // Only allow deletion if user owns the game (not just shared access)
     const deletedGame = await Game.findOneAndDelete({ id: gameId, userId });

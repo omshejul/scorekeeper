@@ -103,7 +103,7 @@ export default function HomePage({
             <div className="text-gray-400 mb-4">
               <Users className="w-16 h-16 mx-auto mb-4" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+            <h3 className="text-xl font-display font-semibold text-gray-600 dark:text-gray-300 mb-2">
               No games yet
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
@@ -136,7 +136,7 @@ export default function HomePage({
 
                         {/* Player colors preview */}
                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                          {game.players.map((player, playerIndex) => (
+                          {game.players.map((player) => (
                             <div
                               key={player.id}
                               className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white text-xs sm:text-sm font-bold"

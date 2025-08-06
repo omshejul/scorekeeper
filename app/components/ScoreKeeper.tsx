@@ -35,7 +35,7 @@ export default function ScoreKeeper() {
 
       if (!guestGamesData) return [];
 
-      const guestGames = JSON.parse(guestGamesData).map((game: any) => ({
+      const guestGames = JSON.parse(guestGamesData).map((game: Game) => ({
         ...game,
         createdAt: new Date(game.createdAt),
         lastPlayed: new Date(game.lastPlayed),
@@ -87,7 +87,7 @@ export default function ScoreKeeper() {
         try {
           const savedGames = localStorage.getItem("scorekeeper-games-guest");
           if (savedGames) {
-            const parsedGames = JSON.parse(savedGames).map((game: any) => ({
+            const parsedGames = JSON.parse(savedGames).map((game: Game) => ({
               ...game,
               createdAt: new Date(game.createdAt),
               lastPlayed: new Date(game.lastPlayed),
@@ -259,7 +259,7 @@ export default function ScoreKeeper() {
           console.log("ScoreKeeper - Updating game to server:", {
             gameId: updatedGame.id,
             players: updatedGame.players,
-            playersScores: updatedGame.players.map((p: any) => ({
+            playersScores: updatedGame.players.map((p: Player) => ({
               name: p.name,
               score: p.score,
             })),
@@ -269,7 +269,7 @@ export default function ScoreKeeper() {
 
           console.log("ScoreKeeper - Server response:", {
             gameId: updated.id,
-            playersFromServer: updated.players.map((p: any) => ({
+            playersFromServer: updated.players.map((p: Player) => ({
               name: p.name,
               score: p.score,
             })),

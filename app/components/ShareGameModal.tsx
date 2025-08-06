@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, QrCode, Users, Plus, Trash2, Loader } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 
 interface ShareGameModalProps {
   game: Game | null;
@@ -19,8 +20,6 @@ export default function ShareGameModal({
   isOpen,
   onClose,
 }: ShareGameModalProps) {
-  const [shareUrl, setShareUrl] = useState("");
-  const [copied, setCopied] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [sharedWith, setSharedWith] = useState<string[]>([]);
@@ -30,6 +29,20 @@ export default function ShareGameModal({
     successful: number;
     failed: number;
   } | null>(null);
+
+  const loadShareInfo = useCallback(async () => {
+    if (!game) return;
+
+    try {
+      const response = await fetch(`/api/games/${game.id}/share`);
+      if (response.ok) {
+        const data = await response.json();
+        setSharedWith(data.sharedWith || []);
+      }
+    } catch (error) {
+      console.error("Failed to load share info:", error);
+    }
+  }, [game]);
 
   useEffect(() => {
     if (game && isOpen) {
@@ -41,22 +54,7 @@ export default function ShareGameModal({
       setQrCodeLoading(true);
       setQrCodeUrl(qrUrl);
     }
-  }, [game, isOpen]);
-
-  const loadShareInfo = async () => {
-    if (!game) return;
-
-    try {
-      const response = await fetch(`/api/games/${game.id}/share`);
-      if (response.ok) {
-        const data = await response.json();
-        setSharedWith(data.sharedWith || []);
-        setShareUrl(window.location.origin);
-      }
-    } catch (error) {
-      console.error("Failed to load share info:", error);
-    }
-  };
+  }, [game, isOpen, loadShareInfo]);
 
   const shareWithEmails = async () => {
     if (!game || !newEmail.trim()) return;
@@ -76,7 +74,6 @@ export default function ShareGameModal({
       if (response.ok) {
         const data = await response.json();
         setSharedWith(data.sharedWith);
-        setShareUrl(window.location.origin);
         setNewEmail("");
 
         // Show email status if available
@@ -125,7 +122,7 @@ export default function ShareGameModal({
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Share "{game.name}"
+                  Share &ldquo;{game.name}&rdquo;
                 </CardTitle>
                 <Button
                   variant="ghost"
@@ -246,9 +243,11 @@ export default function ShareGameModal({
                           <Loader className="w-8 h-8 animate-spin text-gray-900" />
                         </div>
                       )}
-                      <img
+                      <Image
                         src={qrCodeUrl}
                         alt="QR Code for site"
+                        width={128}
+                        height={128}
                         className={`w-32 h-32 ${qrCodeLoading ? "hidden" : ""}`}
                         onLoad={() => setQrCodeLoading(false)}
                         onError={() => setQrCodeLoading(false)}

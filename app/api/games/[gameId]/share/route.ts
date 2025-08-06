@@ -5,6 +5,25 @@ import Game from "@/lib/models/Game";
 import { authOptions } from "@/lib/auth";
 import { sendGameInvites } from "@/lib/email";
 
+// Extended session type to include the id property added by our auth config
+interface ExtendedUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+}
+
+// Type for email sending results (matches what sendGameInvites actually returns)
+interface EmailResults {
+  successful: number;
+  failed: number;
+  results: PromiseSettledResult<unknown>[];
+}
+
 // POST /api/games/[gameId]/share - Share a game with other users
 export async function POST(
   request: NextRequest,
@@ -30,7 +49,7 @@ export async function POST(
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
+    const userId = (session as unknown as ExtendedSession).user.id;
     const userEmail = session.user?.email || "";
 
     // Find the game and ensure user owns it
@@ -65,7 +84,7 @@ export async function POST(
     const shareUrl = `${process.env.NEXTAUTH_URL}`;
     const inviterName = session.user?.name || userEmail.split("@")[0];
 
-    let emailResults = { successful: 0, failed: 0, results: [] as any[] };
+    let emailResults: EmailResults = { successful: 0, failed: 0, results: [] };
 
     try {
       emailResults = await sendGameInvites(emails, {
@@ -114,7 +133,7 @@ export async function GET(
 
     await connectToDatabase();
 
-    const userId = (session.user as any).id;
+    const userId = (session as unknown as ExtendedSession).user.id;
 
     const game = await Game.findOne({ id: gameId, userId });
 

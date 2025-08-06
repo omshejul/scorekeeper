@@ -37,7 +37,7 @@ export default function GamePlay({
 
         console.log("GamePlay - Debounced auto-save:", {
           gameId: updatedGame.id,
-          playersBeforeSave: updatedPlayers.map((p: any) => ({
+          playersBeforeSave: updatedPlayers.map((p: Player) => ({
             name: p.name,
             score: p.score,
           })),

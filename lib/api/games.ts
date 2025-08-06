@@ -12,7 +12,7 @@ export async function fetchGames(): Promise<Game[]> {
   const games = await response.json();
 
   // Convert date strings back to Date objects
-  return games.map((game: any) => ({
+  return games.map((game: Game) => ({
     ...game,
     createdAt: new Date(game.createdAt),
     lastPlayed: new Date(game.lastPlayed),
@@ -69,7 +69,7 @@ export async function updateGame(
     url: `${API_BASE}/${gameId}`,
     gameId,
     dataSize: JSON.stringify(gameData).length,
-    playersInData: gameData.players?.map((p: any) => ({
+    playersInData: gameData.players?.map((p: Player) => ({
       name: p.name,
       score: p.score,
     })),
@@ -99,7 +99,7 @@ export async function updateGame(
 
   console.log("lib/api/games - Successful response:", {
     gameId: game.id,
-    playersFromResponse: game.players?.map((p: any) => ({
+    playersFromResponse: game.players?.map((p: Player) => ({
       name: p.name,
       score: p.score,
     })),

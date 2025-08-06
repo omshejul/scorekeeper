@@ -3,8 +3,10 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User, Loader } from "lucide-react";
+import { LogOut, Loader } from "lucide-react";
+import { FaApple } from "react-icons/fa";
 import { useState } from "react";
+import Image from "next/image";
 
 export function AuthButton() {
   const { data: session, status } = useSession();
@@ -72,31 +74,53 @@ export function AuthButton() {
 
   return (
     <div className="flex flex-col items-center gap-2 w-full">
-      <Button
-        variant="outline"
-        onClick={async () => {
-          setIsSigningIn(true);
-          try {
-            await signIn("google");
-          } finally {
-            setIsSigningIn(false);
-          }
-        }}
-        disabled={isSigningIn}
-        className="flex items-center gap-2 rounded-full"
-      >
-        {isSigningIn ? (
-          <>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            setIsSigningIn(true);
+            try {
+              await signIn("google");
+            } finally {
+              setIsSigningIn(false);
+            }
+          }}
+          disabled={isSigningIn}
+          className="!px-8 py-2 flex items-center gap-2 rounded-full"
+        >
+          {isSigningIn ? (
             <Loader className="w-4 h-4 animate-spin" />
-            Signing In...
-          </>
-        ) : (
-          <>
-            <img src="/google.webp" alt="Google logo" className="w-4 h-4" />
-            Sign In
-          </>
-        )}
-      </Button>
+          ) : (
+            <Image
+              src="/google.webp"
+              alt="Google logo"
+              width={16}
+              height={16}
+              className="w-4 h-4"
+            />
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            setIsSigningIn(true);
+            try {
+              await signIn("apple");
+            } finally {
+              setIsSigningIn(false);
+            }
+          }}
+          disabled={isSigningIn}
+          className="!px-8 py-2 flex border border-neutral-500/50 items-center gap-2 rounded-full bg-black text-white hover:bg-gray-900"
+        >
+          {isSigningIn ? (
+            <Loader className="w-4 h-4 animate-spin text-white" />
+          ) : (
+            <FaApple className="w-4 h-4 text-white" />
+          )}
+        </Button>
+      </div>
       <span className="text-xs text-center w-full text-gray-500 whitespace-nowrap">
         Sign in to save and share your scores
       </span>

@@ -69,7 +69,7 @@ export const GameInviteEmail = ({
                   lineHeight: "1.4",
                 }}
               >
-                You've been invited to join an exciting game!
+                You&apos;ve been invited to join an exciting game!
               </Text>
             </Section>
 
@@ -136,11 +136,11 @@ export const GameInviteEmail = ({
                 This invitation was sent from <strong>ScoreKeeper</strong>
               </Text>
               <Text className="text-[12px] text-gray-400 leading-[16px]">
-                If you didn't expect this email, you can safely ignore it.
+                If you didn&apos;t expect this email, you can safely ignore it.
               </Text>
               <Hr className="border border-gray-200 my-[16px]" />
               <Text className="text-[11px] text-gray-400 leading-[16px]">
-                © 2024 ScoreKeeper. All rights reserved.
+                © {new Date().getFullYear()} ScoreKeeper. All rights reserved.
               </Text>
             </Section>
           </Container>
