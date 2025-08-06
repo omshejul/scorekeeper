@@ -1,6 +1,54 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
+import jwt from "jsonwebtoken";
+
+// Function to generate Apple client secret JWT
+function generateAppleClientSecret() {
+  const teamId = process.env.APPLE_TEAM_ID!;
+  const clientId = process.env.APPLE_CLIENT_ID!;
+  const keyId = process.env.APPLE_KEY_ID!;
+  const privateKey = process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, "\n");
+
+  const payload = {
+    iss: teamId,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600 * 24 * 180, // 180 days (max 6 months)
+    aud: "https://appleid.apple.com",
+    sub: clientId,
+  };
+
+  return jwt.sign(payload, privateKey, {
+    algorithm: "ES256",
+    keyid: keyId,
+  });
+}
+
+// Cache for the generated client secret
+let cachedClientSecret: string | null = null;
+let secretExpiry: number | null = null;
+
+// Function to get Apple client secret with caching
+function getAppleClientSecret() {
+  const now = Math.floor(Date.now() / 1000);
+
+  // Check if we have a cached secret that's still valid (with 1 day buffer)
+  if (cachedClientSecret && secretExpiry && now < secretExpiry - 86400) {
+    return cachedClientSecret;
+  }
+
+  // Generate new secret
+  cachedClientSecret = generateAppleClientSecret();
+  secretExpiry = Math.floor(Date.now() / 1000) + 3600 * 24 * 180;
+
+  console.log(
+    `Generated new Apple client secret, expires in ${Math.floor(
+      (secretExpiry - now) / 86400
+    )} days`
+  );
+
+  return cachedClientSecret;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,11 +58,7 @@ export const authOptions: NextAuthOptions = {
     }),
     AppleProvider({
       clientId: process.env.APPLE_CLIENT_ID!,
-      clientSecret: {
-        teamId: process.env.APPLE_TEAM_ID!,
-        privateKey: process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
-        keyId: process.env.APPLE_KEY_ID!,
-      } as unknown as string,
+      clientSecret: getAppleClientSecret(),
       client: {
         token_endpoint_auth_method: "client_secret_post",
       },
