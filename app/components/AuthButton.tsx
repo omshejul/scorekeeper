@@ -10,7 +10,8 @@ import Image from "next/image";
 
 export function AuthButton() {
   const { data: session, status } = useSession();
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
+  const [isAppleSigningIn, setIsAppleSigningIn] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (status === "loading") {
@@ -79,17 +80,17 @@ export function AuthButton() {
           variant="outline"
           size="sm"
           onClick={async () => {
-            setIsSigningIn(true);
+            setIsGoogleSigningIn(true);
             try {
               await signIn("google");
             } finally {
-              setIsSigningIn(false);
+              setIsGoogleSigningIn(false);
             }
           }}
-          disabled={isSigningIn}
+          disabled={isGoogleSigningIn}
           className="!px-8 py-2 flex items-center gap-2 rounded-full"
         >
-          {isSigningIn ? (
+          {isGoogleSigningIn ? (
             <Loader className="w-4 h-4 animate-spin" />
           ) : (
             <Image
@@ -104,17 +105,17 @@ export function AuthButton() {
         <Button
           variant="outline"
           onClick={async () => {
-            setIsSigningIn(true);
+            setIsAppleSigningIn(true);
             try {
               await signIn("apple");
             } finally {
-              setIsSigningIn(false);
+              setIsAppleSigningIn(false);
             }
           }}
-          disabled={isSigningIn}
+          disabled={isAppleSigningIn}
           className="!px-8 py-2 flex border border-neutral-500/50 items-center gap-2 rounded-full bg-black text-white hover:bg-gray-900"
         >
-          {isSigningIn ? (
+          {isAppleSigningIn ? (
             <Loader className="w-4 h-4 animate-spin text-white" />
           ) : (
             <FaApple className="w-4 h-4 text-white" />
