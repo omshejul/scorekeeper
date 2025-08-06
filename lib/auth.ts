@@ -8,7 +8,21 @@ function generateAppleClientSecret() {
   const teamId = process.env.APPLE_TEAM_ID!;
   const clientId = process.env.APPLE_CLIENT_ID!;
   const keyId = process.env.APPLE_KEY_ID!;
-  const privateKey = process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, "\n");
+
+  // Process the private key - ensure it's in the correct format for ES256
+  let privateKey = process.env.APPLE_PRIVATE_KEY!;
+
+  // Handle different private key formats
+  if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+    // If it's just the key content without PEM headers, add them
+    privateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey.replace(
+      /\\n/g,
+      "\n"
+    )}\n-----END PRIVATE KEY-----`;
+  } else {
+    // If it already has PEM headers, just fix newlines
+    privateKey = privateKey.replace(/\\n/g, "\n");
+  }
 
   const payload = {
     iss: teamId,
@@ -18,10 +32,17 @@ function generateAppleClientSecret() {
     sub: clientId,
   };
 
-  return jwt.sign(payload, privateKey, {
-    algorithm: "ES256",
-    keyid: keyId,
-  });
+  try {
+    return jwt.sign(payload, privateKey, {
+      algorithm: "ES256",
+      keyid: keyId,
+    });
+  } catch (error) {
+    console.error("Error generating Apple client secret:", error);
+    throw new Error(
+      "Failed to generate Apple client secret. Check your APPLE_PRIVATE_KEY format."
+    );
+  }
 }
 
 // Cache for the generated client secret
