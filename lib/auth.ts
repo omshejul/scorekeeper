@@ -15,6 +15,9 @@ export const authOptions: NextAuthOptions = {
         privateKey: process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
         keyId: process.env.APPLE_KEY_ID!,
       } as unknown as string,
+      client: {
+        token_endpoint_auth_method: "client_secret_post",
+      },
     }),
   ],
   callbacks: {
