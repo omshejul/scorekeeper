@@ -62,7 +62,7 @@ export default function HomePage({
           <Button
             onClick={onNewGame}
             size="lg"
-            className="w-full h-16 text-lg gap-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            className="rounded-2xl w-full h-16 text-lg gap-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg transition-all duration-300"
           >
             <Plus className="w-6 h-6" />
             Add New Game
