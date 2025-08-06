@@ -129,7 +129,9 @@ export const authOptions: NextAuthOptions = {
         path: "/",
         secure: process.env.NODE_ENV === "production",
         domain:
-          process.env.NODE_ENV === "production" ? ".arthkin.com" : undefined,
+          process.env.NODE_ENV === "production"
+            ? process.env.NEXTAUTH_COOKIE_DOMAIN
+            : undefined,
       },
     },
     callbackUrl: {
@@ -140,7 +142,9 @@ export const authOptions: NextAuthOptions = {
         path: "/",
         secure: process.env.NODE_ENV === "production",
         domain:
-          process.env.NODE_ENV === "production" ? ".arthkin.com" : undefined,
+          process.env.NODE_ENV === "production"
+            ? process.env.NEXTAUTH_COOKIE_DOMAIN
+            : undefined,
       },
     },
     csrfToken: {
@@ -151,7 +155,9 @@ export const authOptions: NextAuthOptions = {
         path: "/",
         secure: process.env.NODE_ENV === "production",
         domain:
-          process.env.NODE_ENV === "production" ? ".arthkin.com" : undefined,
+          process.env.NODE_ENV === "production"
+            ? process.env.NEXTAUTH_COOKIE_DOMAIN
+            : undefined,
       },
     },
   },
