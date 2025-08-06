@@ -21,6 +21,13 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
+    console.log("API /games - Session check:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: (session?.user as { id?: string })?.id,
+      userEmail: session?.user?.email,
+    });
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

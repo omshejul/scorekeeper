@@ -19,6 +19,15 @@ type AppState = "home" | "setup" | "playing";
 
 export default function ScoreKeeper() {
   const { data: session, status } = useSession();
+
+  console.log("ScoreKeeper - Session status:", {
+    status,
+    hasSession: !!session,
+    hasUser: !!session?.user,
+    userId: (session?.user as { id?: string })?.id,
+    userEmail: session?.user?.email,
+  });
+
   const [appState, setAppState] = useState<AppState>("home");
   const [games, setGames] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
