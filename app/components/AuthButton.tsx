@@ -82,7 +82,7 @@ export function AuthButton() {
           onClick={async () => {
             setIsGoogleSigningIn(true);
             try {
-              await signIn("google");
+              await signIn("google", { callbackUrl: "/" });
             } finally {
               setIsGoogleSigningIn(false);
             }
@@ -107,7 +107,9 @@ export function AuthButton() {
           onClick={async () => {
             setIsAppleSigningIn(true);
             try {
-              await signIn("apple");
+              await signIn("apple", { callbackUrl: "/" });
+              // Keep loading state for a bit longer to ensure smooth UX
+              await new Promise((resolve) => setTimeout(resolve, 3000));
             } finally {
               setIsAppleSigningIn(false);
             }

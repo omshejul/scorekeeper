@@ -71,6 +71,23 @@ function getAppleClientSecret() {
   return cachedClientSecret;
 }
 
+// Pre-generate the Apple client secret to avoid delays during authentication
+function initializeAppleClientSecret() {
+  try {
+    // Generate the secret immediately when the module loads
+    const secret = getAppleClientSecret();
+    console.log("Apple client secret pre-generated successfully");
+    return secret;
+  } catch (error) {
+    console.error("Failed to pre-generate Apple client secret:", error);
+    // Return a fallback that will generate on-demand
+    return null;
+  }
+}
+
+// Initialize the secret when the module loads
+const preGeneratedAppleSecret = initializeAppleClientSecret();
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -79,7 +96,7 @@ export const authOptions: NextAuthOptions = {
     }),
     AppleProvider({
       clientId: process.env.APPLE_CLIENT_ID!,
-      clientSecret: getAppleClientSecret(),
+      clientSecret: preGeneratedAppleSecret || getAppleClientSecret(),
       client: {
         token_endpoint_auth_method: "client_secret_post",
       },
