@@ -1,9 +1,9 @@
 "use client";
 
-import { Game, Player } from "@/app/types/game";
-import { motion } from "framer-motion";
-import { Minus, X, MoreVertical, RotateCcw } from "lucide-react";
-import { useCallback, useState, useEffect, useRef } from "react";
+import { Game, Player } from "@/app/types/game"
+import { motion } from "framer-motion"
+import { Minus, MoreVertical, RefreshCw, RotateCcw, X } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface GamePlayProps {
   game: Game;
@@ -18,7 +18,7 @@ export default function GamePlay({
 }: GamePlayProps) {
   const [players, setPlayers] = useState<Player[]>(game.players);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isRotated, setIsRotated] = useState(false);
+  const [isRotated, setIsRotated] = useState(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced auto-save function
@@ -181,6 +181,22 @@ export default function GamePlay({
     [onExitGame, updateParentGame]
   );
 
+  const handleResetScores = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setPlayers((prev) => {
+        const resetPlayers = prev.map(player => ({
+          ...player,
+          score: 0
+        }));
+        debouncedAutoSave(resetPlayers);
+        return resetPlayers;
+      });
+      setIsMenuOpen(false);
+    },
+    [debouncedAutoSave]
+  );
+
   return (
     <div className="fixed inset-0 select-none overflow-hidden">
       {/* Menu Button */}
@@ -208,6 +224,14 @@ export default function GamePlay({
             >
               <RotateCcw className="w-4 h-4" />
               <span>{isRotated ? "Normal View" : "Rotate"}</span>
+            </button>
+            <div className="h-px w-full bg-white/20" />
+            <button
+              onClick={handleResetScores}
+              className="w-full flex items-center gap-2 px-3 py-2 text-white hover:bg-white/20 rounded-md text-sm transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Reset Scores</span>
             </button>
             <div className="h-px w-full bg-white/20" />
             <button
