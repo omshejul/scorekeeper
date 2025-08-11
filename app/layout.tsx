@@ -3,8 +3,6 @@ import { Figtree, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-
-
 const figtree = Figtree({
   variable: "--font-figtree",
   subsets: ["latin"],
@@ -30,6 +28,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Om Shejul" }],
   creator: "Om Shejul",
+  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },

@@ -14,11 +14,15 @@ import GamePlay from "./GamePlay";
 import GameSetup from "./GameSetup";
 import HomePage from "./HomePage";
 import ShareGameModal from "./ShareGameModal";
+import OfflineStatus from "./OfflineStatus";
+import InstallPrompt from "./InstallPrompt";
+import { useOffline } from "@/lib/hooks/useOffline";
 
 type AppState = "home" | "setup" | "playing";
 
 export default function ScoreKeeper() {
   const { data: session, status } = useSession();
+  const { isInitialized } = useOffline();
   const [appState, setAppState] = useState<AppState>("home");
   const [games, setGames] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
@@ -77,62 +81,31 @@ export default function ScoreKeeper() {
     }
   }, []);
 
-  // Load games from MongoDB when user session is available, or localStorage for guests
+  // Load games when session is ready and offline API is initialized
   useEffect(() => {
     async function loadGames() {
-      if (status === "loading") return;
-
-      if (!session?.user) {
-        // Load from localStorage for guests
-        try {
-          const savedGames = localStorage.getItem("scorekeeper-games-guest");
-          if (savedGames) {
-            const parsedGames = JSON.parse(savedGames).map((game: any) => ({
-              ...game,
-              createdAt: new Date(game.createdAt),
-              lastPlayed: new Date(game.lastPlayed),
-            }));
-            setGames(parsedGames);
-          } else {
-            setGames([]);
-          }
-        } catch (error) {
-          console.error("Failed to load guest games:", error);
-          setGames([]);
-        }
-        return;
-      }
+      if (status === "loading" || !isInitialized) return;
 
       try {
         setLoading(true);
 
-        // Check if we need to migrate guest games
-        const guestGamesData = localStorage.getItem("scorekeeper-games-guest");
-        if (guestGamesData) {
-          const guestGames = JSON.parse(guestGamesData);
-          if (guestGames.length > 0) {
-            console.log("Found guest games, starting migration...");
-            const migratedGames = await migrateGuestGames();
-            const cloudGames = await fetchGames();
-            // Combine migrated and existing cloud games, removing duplicates by ID
-            const allGames = [...cloudGames];
-            migratedGames.forEach((migrated) => {
-              if (!allGames.find((existing) => existing.id === migrated.id)) {
-                allGames.push(migrated);
-              }
-            });
-            setGames(
-              allGames.sort(
-                (a, b) =>
-                  new Date(b.lastPlayed).getTime() -
-                  new Date(a.lastPlayed).getTime()
-              )
-            );
-            return;
+        // Check if we need to migrate guest games for authenticated users
+        if (session?.user) {
+          const guestGamesData = localStorage.getItem(
+            "scorekeeper-games-guest"
+          );
+          if (guestGamesData) {
+            const guestGames = JSON.parse(guestGamesData);
+            if (guestGames.length > 0) {
+              console.log("Found guest games, starting migration...");
+              await migrateGuestGames();
+              // Clear the localStorage after migration
+              localStorage.removeItem("scorekeeper-games-guest");
+            }
           }
         }
 
-        // Normal cloud game loading
+        // Fetch games using offline-first API
         const fetchedGames = await fetchGames();
         setGames(fetchedGames);
       } catch (error) {
@@ -144,16 +117,9 @@ export default function ScoreKeeper() {
     }
 
     loadGames();
-  }, [session, status, migrateGuestGames]);
+  }, [session, status, isInitialized, migrateGuestGames]);
 
-  // Save games to localStorage for guests
-  useEffect(() => {
-    if (status === "loading") return;
-
-    if (!session?.user && games.length > 0) {
-      localStorage.setItem("scorekeeper-games-guest", JSON.stringify(games));
-    }
-  }, [games, session, status]);
+  // Note: Game persistence is now handled by the offline API layer
 
   const handleNewGame = () => {
     setAppState("setup");
@@ -165,36 +131,28 @@ export default function ScoreKeeper() {
   };
 
   const handleStartGame = async (gameName: string, players: Player[]) => {
-    const newGame: Game = {
-      id: Date.now().toString(),
-      name: gameName,
-      players,
-      createdAt: new Date(),
-      lastPlayed: new Date(),
-    };
-
     try {
       setLoading(true);
 
-      // If user is authenticated, save to database
-      if (session?.user) {
-        const savedGame = await createGame({
-          id: newGame.id,
-          name: newGame.name,
-          players: newGame.players,
-        });
-        setGames((prev) => [savedGame, ...prev]);
-        setCurrentGame(savedGame);
-      } else {
-        // If not authenticated, just start the game locally
-        setGames((prev) => [newGame, ...prev]);
-        setCurrentGame(newGame);
-      }
+      const savedGame = await createGame({
+        id: Date.now().toString(),
+        name: gameName,
+        players: players,
+      });
 
+      setGames((prev) => [savedGame, ...prev]);
+      setCurrentGame(savedGame);
       setAppState("playing");
     } catch (error) {
       console.error("Failed to create game:", error);
-      // Fallback: start game locally even if database save fails
+      // This should not happen with offline-first API, but as a safety fallback
+      const newGame: Game = {
+        id: Date.now().toString(),
+        name: gameName,
+        players,
+        createdAt: new Date(),
+        lastPlayed: new Date(),
+      };
       setGames((prev) => [newGame, ...prev]);
       setCurrentGame(newGame);
       setAppState("playing");
@@ -207,18 +165,14 @@ export default function ScoreKeeper() {
     try {
       setLoading(true);
 
-      // For authenticated users, fetch the latest game data from server
-      if (session?.user) {
-        const latestGame = await fetchGame(game.id);
-        setCurrentGame(latestGame);
-        // Also update the local games list with the fresh data
-        setGames((prev) =>
-          prev.map((g) => (g.id === latestGame.id ? latestGame : g))
-        );
-      } else {
-        // For guest users, use local data
-        setCurrentGame(game);
-      }
+      // Fetch the latest game data (offline-first)
+      const latestGame = await fetchGame(game.id);
+      setCurrentGame(latestGame);
+
+      // Update the local games list with the fresh data
+      setGames((prev) =>
+        prev.map((g) => (g.id === latestGame.id ? latestGame : g))
+      );
 
       setAppState("playing");
     } catch (error) {
@@ -235,12 +189,10 @@ export default function ScoreKeeper() {
     try {
       setLoading(true);
 
-      // If user is authenticated, delete from database
-      if (session?.user) {
-        await deleteGame(gameId);
-      }
+      // Delete using offline-first API
+      await deleteGame(gameId);
 
-      // Always remove from local state
+      // Remove from local state
       setGames((prev) => prev.filter((game) => game.id !== gameId));
     } catch (error) {
       console.error("Failed to delete game:", error);
@@ -251,54 +203,41 @@ export default function ScoreKeeper() {
     }
   };
 
-  const handleUpdateGame = useCallback(
-    async (updatedGame: Game) => {
-      try {
-        // If user is authenticated, save to database
-        if (session?.user) {
-          console.log("ScoreKeeper - Updating game to server:", {
-            gameId: updatedGame.id,
-            players: updatedGame.players,
-            playersScores: updatedGame.players.map((p: any) => ({
-              name: p.name,
-              score: p.score,
-            })),
-          });
+  const handleUpdateGame = useCallback(async (updatedGame: Game) => {
+    try {
+      console.log("ScoreKeeper - Updating game:", {
+        gameId: updatedGame.id,
+        players: updatedGame.players,
+        playersScores: updatedGame.players.map((p: any) => ({
+          name: p.name,
+          score: p.score,
+        })),
+      });
 
-          const updated = await updateGame(updatedGame.id, updatedGame);
+      // Update using offline-first API
+      const updated = await updateGame(updatedGame.id, updatedGame);
 
-          console.log("ScoreKeeper - Server response:", {
-            gameId: updated.id,
-            playersFromServer: updated.players.map((p: any) => ({
-              name: p.name,
-              score: p.score,
-            })),
-          });
+      console.log("ScoreKeeper - Game updated:", {
+        gameId: updated.id,
+        playersFromResult: updated.players.map((p: any) => ({
+          name: p.name,
+          score: p.score,
+        })),
+      });
 
-          setGames((prev) =>
-            prev.map((game) => (game.id === updated.id ? updated : game))
-          );
-          setCurrentGame(updated);
-        } else {
-          // If not authenticated, just update local state
-          setGames((prev) =>
-            prev.map((game) =>
-              game.id === updatedGame.id ? updatedGame : game
-            )
-          );
-          setCurrentGame(updatedGame);
-        }
-      } catch (error) {
-        console.error("Failed to update game:", error);
-        // Fallback: still update local state
-        setGames((prev) =>
-          prev.map((game) => (game.id === updatedGame.id ? updatedGame : game))
-        );
-        setCurrentGame(updatedGame);
-      }
-    },
-    [session]
-  );
+      setGames((prev) =>
+        prev.map((game) => (game.id === updated.id ? updated : game))
+      );
+      setCurrentGame(updated);
+    } catch (error) {
+      console.error("Failed to update game:", error);
+      // Fallback: still update local state
+      setGames((prev) =>
+        prev.map((game) => (game.id === updatedGame.id ? updatedGame : game))
+      );
+      setCurrentGame(updatedGame);
+    }
+  }, []);
 
   const handleExitGame = () => {
     setAppState("home");
@@ -317,6 +256,9 @@ export default function ScoreKeeper() {
 
   return (
     <>
+      <OfflineStatus />
+      <InstallPrompt />
+
       {(() => {
         switch (appState) {
           case "home":
