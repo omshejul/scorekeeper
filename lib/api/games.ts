@@ -1,38 +1,17 @@
 import { Game, Player } from "@/app/types/game";
+import offlineAPI from "@/lib/offline/offlineAPI";
 
-const API_BASE = "/api/games";
+// Initialize offline API
+if (typeof window !== "undefined") {
+  offlineAPI.init().catch(console.error);
+}
 
 export async function fetchGames(): Promise<Game[]> {
-  const response = await fetch(API_BASE);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch games");
-  }
-
-  const games = await response.json();
-
-  // Convert date strings back to Date objects
-  return games.map((game: any) => ({
-    ...game,
-    createdAt: new Date(game.createdAt),
-    lastPlayed: new Date(game.lastPlayed),
-  }));
+  return await offlineAPI.fetchGames();
 }
 
 export async function fetchGame(gameId: string): Promise<Game> {
-  const response = await fetch(`${API_BASE}/${gameId}`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch game");
-  }
-
-  const game = await response.json();
-
-  return {
-    ...game,
-    createdAt: new Date(game.createdAt),
-    lastPlayed: new Date(game.lastPlayed),
-  };
+  return await offlineAPI.fetchGame(gameId);
 }
 
 export async function createGame(gameData: {
@@ -40,84 +19,40 @@ export async function createGame(gameData: {
   name: string;
   players: Player[];
 }): Promise<Game> {
-  const response = await fetch(API_BASE, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(gameData),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to create game");
-  }
-
-  const game = await response.json();
-
-  return {
-    ...game,
-    createdAt: new Date(game.createdAt),
-    lastPlayed: new Date(game.lastPlayed),
-  };
+  return await offlineAPI.createGame(gameData);
 }
 
 export async function updateGame(
   gameId: string,
   gameData: Partial<Game>
 ): Promise<Game> {
-  console.log("lib/api/games - Sending PUT request:", {
-    url: `${API_BASE}/${gameId}`,
+  console.log("lib/api/games - Updating game:", {
     gameId,
     dataSize: JSON.stringify(gameData).length,
     playersInData: gameData.players?.map((p: any) => ({
       name: p.name,
       score: p.score,
     })),
+    isOnline: offlineAPI.isAppOnline(),
   });
 
-  const response = await fetch(`${API_BASE}/${gameId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(gameData),
-  });
+  const result = await offlineAPI.updateGame(gameId, gameData);
 
-  console.log(
-    "lib/api/games - Response status:",
-    response.status,
-    response.statusText
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("lib/api/games - Error response:", errorText);
-    throw new Error(`Failed to update game: ${response.status} ${errorText}`);
-  }
-
-  const game = await response.json();
-
-  console.log("lib/api/games - Successful response:", {
-    gameId: game.id,
-    playersFromResponse: game.players?.map((p: any) => ({
+  console.log("lib/api/games - Game updated:", {
+    gameId: result.id,
+    playersFromResult: result.players?.map((p: any) => ({
       name: p.name,
       score: p.score,
     })),
   });
 
-  return {
-    ...game,
-    createdAt: new Date(game.createdAt),
-    lastPlayed: new Date(game.lastPlayed),
-  };
+  return result;
 }
 
 export async function deleteGame(gameId: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/${gameId}`, {
-    method: "DELETE",
-  });
+  return await offlineAPI.deleteGame(gameId);
+}
 
-  if (!response.ok) {
-    throw new Error("Failed to delete game");
-  }
+export async function joinSharedGame(shareCode: string): Promise<Game> {
+  return await offlineAPI.joinSharedGame(shareCode);
 }
