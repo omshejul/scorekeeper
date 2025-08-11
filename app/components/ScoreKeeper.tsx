@@ -10,6 +10,7 @@ import {
   updateGame,
   deleteGame,
 } from "@/lib/api/games";
+import offlineAPI from "@/lib/offline/offlineAPI";
 import GamePlay from "./GamePlay";
 import GameSetup from "./GameSetup";
 import HomePage from "./HomePage";
@@ -117,6 +118,13 @@ export default function ScoreKeeper() {
 
     loadGames();
   }, [session, status, isInitialized, migrateGuestGames]);
+
+  // Update authentication status when session changes
+  useEffect(() => {
+    if (status !== "loading") {
+      offlineAPI.setAuthenticationStatus(!!session?.user);
+    }
+  }, [session, status]);
 
   // Note: Game persistence is now handled by the offline API layer
 

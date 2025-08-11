@@ -9,6 +9,7 @@ export interface CreateGameParams {
 
 class OfflineAPI {
   private isOnline: boolean = true;
+  private isAuthenticated: boolean = false;
 
   constructor() {
     // Initialize online status
@@ -19,6 +20,10 @@ class OfflineAPI {
       window.addEventListener("online", this.handleOnline.bind(this));
       window.addEventListener("offline", this.handleOffline.bind(this));
     }
+  }
+
+  setAuthenticationStatus(isAuthenticated: boolean): void {
+    this.isAuthenticated = isAuthenticated;
   }
 
   private handleOnline(): void {
@@ -114,7 +119,7 @@ class OfflineAPI {
     // Always save locally first
     await indexedDBManager.saveGame(game);
 
-    if (this.isOnline) {
+    if (this.isOnline && this.isAuthenticated) {
       try {
         // Try to sync with server
         const response = await fetch("/api/games", {
@@ -150,15 +155,15 @@ class OfflineAPI {
         }
       } catch (error) {
         console.log("Failed to create game on server, queued for sync:", error);
-        // Queue for sync when online
+        // Queue for sync when online (only for authenticated users)
         await this.queueForSync("POST", "/api/games", {
           id: game.id,
           name: game.name,
           players: game.players,
         });
       }
-    } else {
-      // Queue for sync when online
+    } else if (!this.isOnline && this.isAuthenticated) {
+      // Queue for sync when online (only for authenticated users)
       await this.queueForSync("POST", "/api/games", {
         id: game.id,
         name: game.name,
@@ -186,7 +191,7 @@ class OfflineAPI {
     // Save locally first
     await indexedDBManager.saveGame(updatedGame);
 
-    if (this.isOnline) {
+    if (this.isOnline && this.isAuthenticated) {
       try {
         // Try to sync with server
         const response = await fetch(`/api/games/${gameId}`, {
@@ -214,11 +219,11 @@ class OfflineAPI {
         }
       } catch (error) {
         console.log("Failed to update game on server, queued for sync:", error);
-        // Queue for sync when online
+        // Queue for sync when online (only for authenticated users)
         await this.queueForSync("PUT", `/api/games/${gameId}`, updates);
       }
-    } else {
-      // Queue for sync when online
+    } else if (!this.isOnline && this.isAuthenticated) {
+      // Queue for sync when online (only for authenticated users)
       await this.queueForSync("PUT", `/api/games/${gameId}`, updates);
     }
 
@@ -229,7 +234,7 @@ class OfflineAPI {
     // Delete locally first
     await indexedDBManager.deleteGame(gameId);
 
-    if (this.isOnline) {
+    if (this.isOnline && this.isAuthenticated) {
       try {
         // Try to delete from server
         const response = await fetch(`/api/games/${gameId}`, {
@@ -245,11 +250,11 @@ class OfflineAPI {
           "Failed to delete game from server, queued for sync:",
           error
         );
-        // Queue for sync when online
+        // Queue for sync when online (only for authenticated users)
         await this.queueForSync("DELETE", `/api/games/${gameId}`);
       }
-    } else {
-      // Queue for sync when online
+    } else if (!this.isOnline && this.isAuthenticated) {
+      // Queue for sync when online (only for authenticated users)
       await this.queueForSync("DELETE", `/api/games/${gameId}`);
     }
   }
@@ -319,6 +324,11 @@ class OfflineAPI {
   }
 
   private async syncPendingChanges(): Promise<void> {
+    // Only sync if user is authenticated
+    if (!this.isAuthenticated) {
+      return;
+    }
+
     try {
       const syncQueue = await indexedDBManager.getSyncQueue();
 
@@ -369,7 +379,15 @@ class OfflineAPI {
     return this.isOnline;
   }
 
+  isUserAuthenticated(): boolean {
+    return this.isAuthenticated;
+  }
+
   async getPendingSyncCount(): Promise<number> {
+    // Only return sync count for authenticated users
+    if (!this.isAuthenticated) {
+      return 0;
+    }
     const syncQueue = await indexedDBManager.getSyncQueue();
     return syncQueue.length;
   }

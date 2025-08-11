@@ -9,10 +9,12 @@ export default function CompactOfflineStatus() {
   const [isOnline, setIsOnline] = useState(true);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
   const [showSyncComplete, setShowSyncComplete] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Initialize
     setIsOnline(navigator.onLine);
+    setIsAuthenticated(offlineAPI.isUserAuthenticated());
     updatePendingSyncCount();
 
     // Listen for online/offline events
@@ -29,8 +31,11 @@ export default function CompactOfflineStatus() {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Periodically check sync status
-    const interval = setInterval(updatePendingSyncCount, 5000);
+    // Periodically check sync status and auth status
+    const interval = setInterval(() => {
+      setIsAuthenticated(offlineAPI.isUserAuthenticated());
+      updatePendingSyncCount();
+    }, 5000);
 
     return () => {
       window.removeEventListener("online", handleOnline);
@@ -55,8 +60,13 @@ export default function CompactOfflineStatus() {
     }
   };
 
-  // Don't show anything if online and no pending syncs and no sync complete message
-  if (isOnline && pendingSyncCount === 0 && !showSyncComplete) {
+  // Don't show anything if:
+  // - User is not authenticated (guest users don't sync)
+  // - Online with no pending syncs and no sync complete message
+  if (
+    !isAuthenticated ||
+    (isOnline && pendingSyncCount === 0 && !showSyncComplete)
+  ) {
     return null;
   }
 
@@ -99,14 +109,14 @@ export default function CompactOfflineStatus() {
               </div>
               <div>
                 <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
-                  Playing offline
+                  Working offline
                 </p>
                 <p className="text-xs text-orange-600 dark:text-orange-400">
                   {pendingSyncCount > 0
                     ? `${pendingSyncCount} change${
                         pendingSyncCount !== 1 ? "s" : ""
                       } will sync when online`
-                    : "Changes will sync when you're back online"}
+                    : "Changes will sync when you reconnect"}
                 </p>
               </div>
             </div>
