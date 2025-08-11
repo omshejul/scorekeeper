@@ -14,7 +14,6 @@ import GamePlay from "./GamePlay";
 import GameSetup from "./GameSetup";
 import HomePage from "./HomePage";
 import ShareGameModal from "./ShareGameModal";
-import OfflineStatus from "./OfflineStatus";
 import InstallPrompt from "./InstallPrompt";
 import { useOffline } from "@/lib/hooks/useOffline";
 
@@ -256,7 +255,6 @@ export default function ScoreKeeper() {
 
   return (
     <>
-      <OfflineStatus />
       <InstallPrompt />
 
       {(() => {

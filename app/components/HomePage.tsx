@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Play, Plus, Trash2, Users, Loader, Share2 } from "lucide-react";
 import { AuthButton } from "./AuthButton";
+import CompactOfflineStatus from "./CompactOfflineStatus";
 
 interface HomePageProps {
   games: Game[];
@@ -50,6 +51,15 @@ export default function HomePage({
               </p>
             </div>
           </div>
+        </motion.div>
+
+        {/* Offline Status */}
+        <motion.div
+          initial={{ opacity: 0, y: -10, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ delay: 0.05, duration: 0.2 }}
+        >
+          <CompactOfflineStatus />
         </motion.div>
 
         {/* Add New Game Button */}
